@@ -260,3 +260,8 @@ After replacing `vercel.json`, commit and push, then redeploy.
 - Slime now uses a fresh audio instance on every click, so rapid clicks can overlap instead of restarting the same file.
 - The `AAAAUUUGHHHH` milestone sound still plays every 10 clicks as its own full instance.
 
+
+
+## v17 update
+
+- Hero title and subtitle now use white fill with a black stroke for better contrast.

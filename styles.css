@@ -291,9 +291,9 @@ body::after {
   font-size: clamp(112px, 19vw, 280px);
   line-height: 0.78;
   letter-spacing: -0.035em;
-  color: var(--black);
-  -webkit-text-stroke: 0;
-  paint-order: normal;
+  color: var(--white);
+  -webkit-text-stroke: clamp(4px, 0.75vw, 9px) var(--black);
+  paint-order: stroke fill;
   text-shadow: none;
   transform: rotate(-3deg);
   animation: wobble 4s ease-in-out infinite;
@@ -308,9 +308,9 @@ body::after {
   font-size: clamp(30px, 4.5vw, 52px);
   line-height: 0.95;
   letter-spacing: -0.01em;
-  color: var(--black);
-  -webkit-text-stroke: 0;
-  paint-order: normal;
+  color: var(--white);
+  -webkit-text-stroke: clamp(2px, 0.32vw, 4px) var(--black);
+  paint-order: stroke fill;
   text-shadow: none;
   margin-top: 16px;
   transform: rotate(1deg);
