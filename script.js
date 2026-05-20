@@ -427,10 +427,71 @@
   const mascot = document.getElementById('mascot');
   const countEl = document.getElementById('count');
   const prompt = document.getElementById('prompt');
-  const EMOJIS = ['💦', '🥚', '🤤', '😩', '💧', '🫠', '👅'];
+  const EMOJIS = ['💦', '🥚', '🤤', '😩', '💧', '👅'];
+  const COUNTER_API = '/api/count';
 
   let count = 0;
   let lastPointerAt = 0;
+
+  function parseCounterValue(value) {
+    const parsed = Number.parseInt(String(value ?? '0'), 10);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+  }
+
+  function setCounter(value) {
+    count = parseCounterValue(value);
+    if (countEl) countEl.textContent = count.toLocaleString();
+    if (count > 0 && prompt) prompt.classList.add('is-hidden');
+  }
+
+  function popCounter() {
+    if (!countEl) return;
+    countEl.classList.remove('is-popping');
+    void countEl.offsetWidth;
+    countEl.classList.add('is-popping');
+  }
+
+  async function fetchGlobalCount() {
+    try {
+      const response = await fetch(COUNTER_API, {
+        method: 'GET',
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (!response.ok) throw new Error(`Counter API returned ${response.status}`);
+
+      const data = await response.json();
+      setCounter(data.total);
+    } catch (error) {
+      console.warn('[EGGMON] Global counter unavailable:', error);
+    }
+  }
+
+  async function syncGlobalClick(optimisticCount) {
+    try {
+      const response = await fetch(COUNTER_API, {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' },
+      });
+
+      if (!response.ok) throw new Error(`Counter API returned ${response.status}`);
+
+      const data = await response.json();
+      const serverCount = parseCounterValue(data.total);
+
+      // Avoid older, slower responses rolling the UI backwards after fast clicks.
+      if (serverCount >= count || count <= optimisticCount) {
+        setCounter(serverCount);
+      }
+    } catch (error) {
+      console.warn('[EGGMON] Could not sync global click:', error);
+    }
+  }
+
+  fetchGlobalCount();
+
 
   function createEmoji(x, y) {
     const emoji = document.createElement('div');
@@ -498,13 +559,11 @@
   }
 
   function bumpCounter() {
-    count++;
-    countEl.textContent = count.toLocaleString();
-    countEl.classList.remove('is-popping');
-    void countEl.offsetWidth;
-    countEl.classList.add('is-popping');
-    if (count === 1 && prompt) prompt.classList.add('is-hidden');
-    return count;
+    const optimisticCount = count + 1;
+    setCounter(optimisticCount);
+    popCounter();
+    syncGlobalClick(optimisticCount);
+    return optimisticCount;
   }
 
   function vibrate() {

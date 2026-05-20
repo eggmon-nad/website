@@ -56,7 +56,7 @@ body::before {
   content: '';
   position: fixed; inset: 0;
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0"/></filter><rect width="240" height="240" filter="url(%23n)"/></svg>');
-  opacity: 0.18;
+  opacity: 0.34;
   mix-blend-mode: overlay;
   pointer-events: none;
   z-index: 1;
@@ -133,16 +133,16 @@ body::after {
 /* ---------- Background flying eggmons ---------- */
 .flying-eggs {
   position: fixed;
-  inset: -12vh -12vw;
+  inset: -8vh -8vw;
   z-index: 2;
   pointer-events: none;
   overflow: hidden;
 }
 .flying-egg {
   position: absolute;
-  width: clamp(62px, 8.5vw, 116px);
+  width: clamp(86px, 10.5vw, 148px);
   aspect-ratio: 188 / 291;
-  opacity: 0.18;
+  opacity: 0.34;
   will-change: transform, opacity;
   backface-visibility: hidden;
   transform: translate3d(0, 0, 0);
@@ -151,15 +151,18 @@ body::after {
   content: '';
   position: absolute;
   inset: 0;
-  background: image-set(
-    url('./eggmon.webp') type('image/webp'),
-    url('./eggmon.png') type('image/png')
-  ) center / contain no-repeat;
+  background-image: url('./eggmon.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
   filter:
-    drop-shadow(0 0 10px rgba(95,237,223,0.28))
-    drop-shadow(0 0 18px rgba(238,147,227,0.38));
+    drop-shadow(0 0 12px rgba(95,237,223,0.42))
+    drop-shadow(0 0 22px rgba(238,147,227,0.52));
   transform-origin: 50% 52%;
   animation: egg-spin-soft var(--spin-time, 20s) linear infinite;
+}
+@supports (background-image: url('./eggmon.webp')) {
+  .flying-egg::before { background-image: url('./eggmon.webp'); }
 }
 .flying-egg.e1 { top:  5%;  left:  3%;  --spin-time: 19s; animation: egg-drift-1 24s ease-in-out infinite; }
 .flying-egg.e2 { top: 10%;  right: 4%; --spin-time: 23s; animation: egg-drift-2 28s ease-in-out -5s infinite; }
@@ -172,38 +175,38 @@ body::after {
 .flying-egg.e6::before { animation-direction: reverse; }
 
 @keyframes egg-drift-1 {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.15; }
-  25%      { transform: translate3d(16vw, 8vh, 0) scale(1.08); opacity: 0.22; }
-  50%      { transform: translate3d(9vw, 26vh, 0) scale(0.94); opacity: 0.17; }
-  75%      { transform: translate3d(-4vw, 14vh, 0) scale(1.04); opacity: 0.2; }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.28; }
+  25%      { transform: translate3d(16vw, 8vh, 0) scale(1.08); opacity: 0.42; }
+  50%      { transform: translate3d(9vw, 26vh, 0) scale(0.94); opacity: 0.32; }
+  75%      { transform: translate3d(-4vw, 14vh, 0) scale(1.04); opacity: 0.38; }
 }
 @keyframes egg-drift-2 {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.16; }
-  22%      { transform: translate3d(-14vw, 10vh, 0) scale(0.94); opacity: 0.2; }
-  54%      { transform: translate3d(-7vw, 31vh, 0) scale(1.1); opacity: 0.23; }
-  78%      { transform: translate3d(5vw, 16vh, 0) scale(0.98); opacity: 0.18; }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.30; }
+  22%      { transform: translate3d(-14vw, 10vh, 0) scale(0.94); opacity: 0.38; }
+  54%      { transform: translate3d(-7vw, 31vh, 0) scale(1.1); opacity: 0.44; }
+  78%      { transform: translate3d(5vw, 16vh, 0) scale(0.98); opacity: 0.34; }
 }
 @keyframes egg-drift-3 {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.15; }
-  28%      { transform: translate3d(22vw, -13vh, 0) scale(1.08); opacity: 0.21; }
-  57%      { transform: translate3d(13vw, -34vh, 0) scale(0.92); opacity: 0.18; }
-  82%      { transform: translate3d(-5vw, -22vh, 0) scale(1.03); opacity: 0.2; }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.28; }
+  28%      { transform: translate3d(22vw, -13vh, 0) scale(1.08); opacity: 0.40; }
+  57%      { transform: translate3d(13vw, -34vh, 0) scale(0.92); opacity: 0.34; }
+  82%      { transform: translate3d(-5vw, -22vh, 0) scale(1.03); opacity: 0.38; }
 }
 @keyframes egg-drift-4 {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.15; }
-  24%      { transform: translate3d(-19vw, -11vh, 0) scale(1.06); opacity: 0.22; }
-  52%      { transform: translate3d(-11vw, -33vh, 0) scale(0.96); opacity: 0.18; }
-  76%      { transform: translate3d(4vw, -18vh, 0) scale(1.11); opacity: 0.21; }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.28; }
+  24%      { transform: translate3d(-19vw, -11vh, 0) scale(1.06); opacity: 0.42; }
+  52%      { transform: translate3d(-11vw, -33vh, 0) scale(0.96); opacity: 0.34; }
+  76%      { transform: translate3d(4vw, -18vh, 0) scale(1.11); opacity: 0.40; }
 }
 @keyframes egg-drift-5 {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.12; }
-  35%      { transform: translate3d(18vw, -18vh, 0) scale(1.02); opacity: 0.19; }
-  66%      { transform: translate3d(30vw, 8vh, 0) scale(1.12); opacity: 0.22; }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.24; }
+  35%      { transform: translate3d(18vw, -18vh, 0) scale(1.02); opacity: 0.36; }
+  66%      { transform: translate3d(30vw, 8vh, 0) scale(1.12); opacity: 0.42; }
 }
 @keyframes egg-drift-6 {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; }
-  31%      { transform: translate3d(-20vw, -16vh, 0) scale(1.08); opacity: 0.2; }
-  68%      { transform: translate3d(-32vw, 9vh, 0) scale(0.98); opacity: 0.17; }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.24; }
+  31%      { transform: translate3d(-20vw, -16vh, 0) scale(1.08); opacity: 0.38; }
+  68%      { transform: translate3d(-32vw, 9vh, 0) scale(0.98); opacity: 0.32; }
 }
 @keyframes egg-spin-soft {
   from { transform: rotate(-10deg); }
@@ -266,6 +269,8 @@ body::after {
 
 /* ---------- Title ---------- */
 .title-block {
+  position: relative;
+  z-index: 7;
   text-align: center;
   margin-top: 10px;
 }
@@ -303,6 +308,8 @@ body::after {
 
 /* ---------- Click prompt ---------- */
 .click-prompt {
+  position: relative;
+  z-index: 7;
   display: flex;
   gap: 12px;
   align-items: center;
@@ -328,10 +335,10 @@ body::after {
   aspect-ratio: 188 / 291;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.12s ease-out;
+  transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
   backface-visibility: hidden;
-  z-index: 5;
+  z-index: 4;
   padding: 0;
   overflow: visible;
   isolation: isolate;
@@ -356,7 +363,9 @@ body::after {
   0%, 100% { opacity: 0.68; transform: scale(0.9); }
   50%      { opacity: 0.95; transform: scale(1.02); }
 }
-.mascot-wrap:hover { transform: scale(1.04) rotate(-1deg); }
+@media (hover: hover) and (pointer: fine) {
+  .mascot-wrap:hover { transform: scale(1.025) rotate(-0.5deg); }
+}
 .mascot-wrap.is-jolting { animation: jolt 0.35s cubic-bezier(.36,.07,.19,.97); }
 @keyframes jolt {
   0%   { transform: translate(0, 0) rotate(0) scale(1); }
@@ -410,6 +419,8 @@ body::after {
 
 /* ---------- Counter ---------- */
 .counter-block {
+  position: relative;
+  z-index: 7;
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -429,8 +440,8 @@ body::after {
   paint-order: stroke fill;
 }
 .counter-num {
-  color: var(--pink);
-  -webkit-text-stroke: 1px var(--white);
+  color: var(--mint);
+  -webkit-text-stroke: 1px var(--black);
   paint-order: stroke fill;
   min-width: 2ch;
   text-align: center;
@@ -438,9 +449,9 @@ body::after {
 }
 .counter-num.is-popping { animation: numpop 0.3s ease-out; }
 @keyframes numpop {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.5) rotate(8deg); color: var(--jizz); }
-  100% { transform: scale(1); color: var(--pink); }
+  0%   { transform: scale(1); color: var(--mint); }
+  50%  { transform: scale(1.5) rotate(8deg); color: var(--mint); }
+  100% { transform: scale(1); color: var(--mint); }
 }
 
 /* ---------- Contract address bar ---------- */
@@ -710,8 +721,8 @@ body::after {
 
   body { padding-bottom: 84px; }
 
-  .flying-egg { opacity: 0.13; }
-  .flying-egg.e4, .flying-egg.e5, .flying-egg.e6 { display: none; }
+  .flying-egg { width: clamp(64px, 18vw, 96px); opacity: 0.28; }
+  .flying-egg.e5, .flying-egg.e6 { display: none; }
 }
 
 /* Very small phones */
