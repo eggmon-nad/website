@@ -373,40 +373,38 @@
 
   /* =====================================================
      SOUND EFFECTS
-     - slime squish: normal mascot click
-     - AAAAUUUGHHHH: every 10th click as a meme milestone
+     - one clean channel per sound to prevent crunchy overlap
+     - rate-limited so rapid clicks still feel responsive without glitching
      ===================================================== */
-  const audioPools = new Map();
+  const soundChannels = {
+    slime: { audio: null, src: './sounds/slime-squish.mp3', volume: 0.42, lastPlayedAt: 0, minGap: 90 },
+    augh:  { audio: null, src: './sounds/augh-meme.mp3',    volume: 0.34, lastPlayedAt: 0, minGap: 1400 },
+  };
 
-  function makeAudio(src, volume) {
-    const audio = new Audio(src);
-    audio.preload = 'auto';
-    audio.volume = volume;
-    return audio;
-  }
+  function getSoundChannel(name) {
+    const channel = soundChannels[name];
+    if (!channel) return null;
 
-  function getPool(name, src, volume, size = 4) {
-    if (!audioPools.has(name)) {
-      audioPools.set(name, {
-        index: 0,
-        items: Array.from({ length: size }, () => makeAudio(src, volume)),
-      });
+    if (!channel.audio) {
+      const audio = new Audio(channel.src);
+      audio.preload = 'auto';
+      audio.volume = channel.volume;
+      channel.audio = audio;
     }
-    return audioPools.get(name);
+
+    return channel;
   }
 
-  function playOneShot(name) {
-    const config = {
-      slime: { src: './sounds/slime-squish.mp3', volume: 0.64, size: 5 },
-      augh:  { src: './sounds/augh-meme.mp3',    volume: 0.48, size: 2 },
-    }[name];
-    if (!config) return;
+  function restartSound(name, { force = false } = {}) {
+    const channel = getSoundChannel(name);
+    if (!channel) return;
 
-    const pool = getPool(name, config.src, config.volume, config.size);
-    const audio = pool.items[pool.index];
-    pool.index = (pool.index + 1) % pool.items.length;
+    const now = performance.now();
+    if (!force && now - channel.lastPlayedAt < channel.minGap) return;
+    channel.lastPlayedAt = now;
 
     try {
+      const audio = channel.audio;
       audio.pause();
       audio.currentTime = 0;
       const playPromise = audio.play();
@@ -414,10 +412,17 @@
     } catch (_) {}
   }
 
+  function warmAudio() {
+    getSoundChannel('slime');
+    getSoundChannel('augh');
+  }
+
+  window.addEventListener('pointerdown', warmAudio, { once: true, passive: true });
+
   function playEggSound(nextCount) {
-    playOneShot('slime');
+    restartSound('slime');
     if (nextCount > 0 && nextCount % 10 === 0) {
-      setTimeout(() => playOneShot('augh'), 110);
+      window.setTimeout(() => restartSound('augh', { force: true }), 140);
     }
   }
 
@@ -656,7 +661,6 @@
      COPY CONTRACT ADDRESS
      ===================================================== */
   const copyBtn = document.getElementById('copy');
-  const copyMobileBtn = document.getElementById('copyMobile');
   const caText = document.getElementById('ca');
   const caBar = document.querySelector('.ca-bar');
   const toast = document.getElementById('toast');
@@ -712,11 +716,6 @@
     await copyContract(copyBtn);
   });
 
-  if (copyMobileBtn) {
-    copyMobileBtn.addEventListener('click', async () => {
-      await copyContract(copyMobileBtn);
-    });
-  }
 
   if (caBar) {
     caBar.addEventListener('click', async (e) => {
