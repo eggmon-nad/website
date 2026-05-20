@@ -436,39 +436,64 @@
     const emoji = document.createElement('div');
     emoji.className = 'pop-emoji';
     emoji.textContent = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
-    emoji.style.left = `${x + rand(-42, 42)}px`;
-    emoji.style.top = `${y - rand(8, 28)}px`;
+    emoji.style.left = `${x}px`;
+    emoji.style.top = `${y}px`;
     document.body.appendChild(emoji);
     setTimeout(() => emoji.remove(), 1200);
   }
 
-  function spawnLiquidFromMouth() {
+  function spawnEmojisAroundMascot(rect, isSmallScreen) {
+    const centerX = rect.left + rect.width * 0.5;
+    const centerY = rect.top + rect.height * 0.48;
+    const radiusX = rect.width * 0.58 + (isSmallScreen ? 14 : 24);
+    const radiusY = rect.height * 0.54 + (isSmallScreen ? 10 : 18);
+    const emojiCount = isSmallScreen ? 2 : 3;
+    const usedAngles = [];
+
+    for (let i = 0; i < emojiCount; i++) {
+      let angle = rand(0, Math.PI * 2);
+
+      for (let tries = 0; tries < 6; tries++) {
+        const tooClose = usedAngles.some((a) => Math.abs(a - angle) < 0.9);
+        if (!tooClose) break;
+        angle = rand(0, Math.PI * 2);
+      }
+
+      usedAngles.push(angle);
+
+      const x = centerX + Math.cos(angle) * radiusX + rand(-8, 8);
+      const y = centerY + Math.sin(angle) * radiusY + rand(-8, 8);
+      createEmoji(x, y);
+    }
+  }
+
+  function spawnLiquidFromHead() {
     const rect = mascot.getBoundingClientRect();
 
-    // Tuned to this mascot image: center of the lips/mouth opening.
-    const mouthX = rect.left + rect.width * 0.505;
-    const mouthY = rect.top + rect.height * 0.305;
+    // Source point anchored at the top-center of Eggmon's head.
+    const headX = rect.left + rect.width * 0.505;
+    const headY = rect.top + rect.height * 0.055;
     const reduced = prefersReducedMotion.matches;
     const isSmallScreen = innerWidth <= 600;
 
-    bursts.push(new LiquidBurst(mouthX, mouthY, isSmallScreen ? 20 : 28, reduced ? 0.18 : 0.34));
-    bursts.push(new LiquidBurst(mouthX + rand(-6, 6), mouthY + rand(5, 12), isSmallScreen ? 14 : 20, reduced ? 0.16 : 0.28));
+    bursts.push(new LiquidBurst(headX, headY, isSmallScreen ? 20 : 28, reduced ? 0.18 : 0.34));
+    bursts.push(new LiquidBurst(headX + rand(-8, 8), headY + rand(8, 18), isSmallScreen ? 14 : 20, reduced ? 0.16 : 0.28));
 
     const stringCount = reduced ? 1 : (isSmallScreen ? 2 : 3);
     for (let i = 0; i < stringCount; i++) {
-      strings.push(new LiquidString(mouthX + rand(-8, 8), mouthY + rand(2, 7)));
+      strings.push(new LiquidString(headX + rand(-10, 10), headY + rand(4, 12)));
     }
 
     const dropCount = reduced ? 8 : (isSmallScreen ? 24 : 34);
     for (let i = 0; i < dropCount; i++) {
       drops.push(new LiquidDrop(
-        mouthX + rand(-12, 12),
-        mouthY + rand(-6, 10),
+        headX + rand(-14, 14),
+        headY + rand(-4, 12),
         reduced,
       ));
     }
 
-    createEmoji(rect.left + rect.width * 0.5, rect.top + rect.height * 0.18);
+    spawnEmojisAroundMascot(rect, isSmallScreen);
     requestFxLoop();
   }
 
@@ -499,7 +524,7 @@
     void mascot.offsetWidth;
     mascot.classList.add('is-jolting');
 
-    spawnLiquidFromMouth();
+    spawnLiquidFromHead();
     const nextCount = bumpCounter();
     playEggSound(nextCount);
     vibrate();

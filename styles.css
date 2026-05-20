@@ -131,33 +131,87 @@ body::after {
 }
 
 /* ---------- Background flying eggmons ---------- */
-.flying-eggs { position: fixed; inset: 0; z-index: 2; pointer-events: none; }
+.flying-eggs {
+  position: fixed;
+  inset: -12vh -12vw;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
 .flying-egg {
   position: absolute;
-  width: clamp(60px, 9vw, 110px);
+  width: clamp(62px, 8.5vw, 116px);
   aspect-ratio: 188 / 291;
-  background: url('./eggmon.png') center / contain no-repeat;
   opacity: 0.18;
-  filter: drop-shadow(0 0 12px rgba(238,147,227,0.45));
-  will-change: transform;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
 }
-.flying-egg.e1 { top:  6%;  left:  4%; animation: floaty 9s ease-in-out infinite, spin 14s linear infinite; }
-.flying-egg.e2 { top: 12%;  right: 6%; animation: floaty 11s ease-in-out -2s infinite, spin 18s linear reverse infinite; }
-.flying-egg.e3 { bottom: 14%; left: 6%; animation: floaty 7s ease-in-out -1s infinite, spin 11s linear infinite; }
-.flying-egg.e4 { bottom: 18%; right: 4%; animation: floaty 10s ease-in-out -3s infinite, spin 16s linear reverse infinite; }
-.flying-egg.e5 { top: 45%; left: 1%; animation: floaty 8s ease-in-out -4s infinite, spin 20s linear infinite; }
-.flying-egg.e6 { top: 52%; right: 1%; animation: floaty 12s ease-in-out -5s infinite, spin 13s linear reverse infinite; }
+.flying-egg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: image-set(
+    url('./eggmon.webp') type('image/webp'),
+    url('./eggmon.png') type('image/png')
+  ) center / contain no-repeat;
+  filter:
+    drop-shadow(0 0 10px rgba(95,237,223,0.28))
+    drop-shadow(0 0 18px rgba(238,147,227,0.38));
+  transform-origin: 50% 52%;
+  animation: egg-spin-soft var(--spin-time, 20s) linear infinite;
+}
+.flying-egg.e1 { top:  5%;  left:  3%;  --spin-time: 19s; animation: egg-drift-1 24s ease-in-out infinite; }
+.flying-egg.e2 { top: 10%;  right: 4%; --spin-time: 23s; animation: egg-drift-2 28s ease-in-out -5s infinite; }
+.flying-egg.e3 { bottom: 11%; left: 5%;  --spin-time: 17s; animation: egg-drift-3 22s ease-in-out -9s infinite; }
+.flying-egg.e4 { bottom: 16%; right: 3%; --spin-time: 27s; animation: egg-drift-4 31s ease-in-out -12s infinite; }
+.flying-egg.e5 { top: 42%; left: -1%; --spin-time: 21s; animation: egg-drift-5 26s ease-in-out -3s infinite; }
+.flying-egg.e6 { top: 52%; right: -1%; --spin-time: 29s; animation: egg-drift-6 34s ease-in-out -15s infinite; }
+.flying-egg.e2::before,
+.flying-egg.e4::before,
+.flying-egg.e6::before { animation-direction: reverse; }
 
-@keyframes floaty {
-  0%, 100% { translate: 0 0; }
-  50%      { translate: 30px -40px; }
+@keyframes egg-drift-1 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.15; }
+  25%      { transform: translate3d(16vw, 8vh, 0) scale(1.08); opacity: 0.22; }
+  50%      { transform: translate3d(9vw, 26vh, 0) scale(0.94); opacity: 0.17; }
+  75%      { transform: translate3d(-4vw, 14vh, 0) scale(1.04); opacity: 0.2; }
 }
-@keyframes spin {
-  from { rotate: 0deg; }
-  to   { rotate: 360deg; }
+@keyframes egg-drift-2 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1.02); opacity: 0.16; }
+  22%      { transform: translate3d(-14vw, 10vh, 0) scale(0.94); opacity: 0.2; }
+  54%      { transform: translate3d(-7vw, 31vh, 0) scale(1.1); opacity: 0.23; }
+  78%      { transform: translate3d(5vw, 16vh, 0) scale(0.98); opacity: 0.18; }
+}
+@keyframes egg-drift-3 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.96); opacity: 0.15; }
+  28%      { transform: translate3d(22vw, -13vh, 0) scale(1.08); opacity: 0.21; }
+  57%      { transform: translate3d(13vw, -34vh, 0) scale(0.92); opacity: 0.18; }
+  82%      { transform: translate3d(-5vw, -22vh, 0) scale(1.03); opacity: 0.2; }
+}
+@keyframes egg-drift-4 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.15; }
+  24%      { transform: translate3d(-19vw, -11vh, 0) scale(1.06); opacity: 0.22; }
+  52%      { transform: translate3d(-11vw, -33vh, 0) scale(0.96); opacity: 0.18; }
+  76%      { transform: translate3d(4vw, -18vh, 0) scale(1.11); opacity: 0.21; }
+}
+@keyframes egg-drift-5 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.9); opacity: 0.12; }
+  35%      { transform: translate3d(18vw, -18vh, 0) scale(1.02); opacity: 0.19; }
+  66%      { transform: translate3d(30vw, 8vh, 0) scale(1.12); opacity: 0.22; }
+}
+@keyframes egg-drift-6 {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(0.92); opacity: 0.12; }
+  31%      { transform: translate3d(-20vw, -16vh, 0) scale(1.08); opacity: 0.2; }
+  68%      { transform: translate3d(-32vw, 9vh, 0) scale(0.98); opacity: 0.17; }
+}
+@keyframes egg-spin-soft {
+  from { transform: rotate(-10deg); }
+  to   { transform: rotate(350deg); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .flying-egg { animation: none !important; }
+  .flying-egg,
+  .flying-egg::before { animation: none !important; }
 }
 
 /* ---------- Particle canvas ---------- */
@@ -274,16 +328,33 @@ body::after {
   aspect-ratio: 188 / 291;
   cursor: pointer;
   user-select: none;
-  filter:
-    drop-shadow(0 14px 0 rgba(0,0,0,0.45))
-    drop-shadow(0 0 30px rgba(238,147,227,0.5));
   transition: transform 0.12s ease-out;
   will-change: transform;
   backface-visibility: hidden;
   z-index: 5;
   padding: 0;
+  overflow: visible;
+  isolation: isolate;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+}
+.mascot-wrap::before {
+  content: '';
+  position: absolute;
+  inset: -22%;
+  border-radius: 999px;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(255,253,240,0.36) 0%, rgba(95,237,223,0.42) 26%, rgba(238,147,227,0.32) 48%, transparent 72%);
+  filter: blur(7px);
+  opacity: 0.88;
+  transform: scale(0.92);
+  animation: mascot-aura 3.8s ease-in-out infinite;
+}
+@keyframes mascot-aura {
+  0%, 100% { opacity: 0.68; transform: scale(0.9); }
+  50%      { opacity: 0.95; transform: scale(1.02); }
 }
 .mascot-wrap:hover { transform: scale(1.04) rotate(-1deg); }
 .mascot-wrap.is-jolting { animation: jolt 0.35s cubic-bezier(.36,.07,.19,.97); }
@@ -296,9 +367,16 @@ body::after {
   100% { transform: translate(0, 0) rotate(0) scale(1); }
 }
 .mascot-picture {
+  position: relative;
+  z-index: 2;
   display: block;
   width: 100%;
   height: 100%;
+  filter:
+    drop-shadow(0 14px 0 rgba(0,0,0,0.45))
+    drop-shadow(0 0 18px rgba(255,253,240,0.45))
+    drop-shadow(0 0 32px rgba(238,147,227,0.48))
+    drop-shadow(0 0 44px rgba(95,237,223,0.22));
 }
 .mascot-img {
   width: 100%;
@@ -309,15 +387,21 @@ body::after {
 
 .mascot-glow {
   position: absolute;
-  inset: -12%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(95,237,223,0.55) 0%, transparent 60%);
+  inset: -26%;
+  border-radius: 999px;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(255,253,240,0.55) 0%, rgba(95,237,223,0.55) 26%, rgba(238,147,227,0.42) 52%, transparent 74%);
+  filter: blur(10px);
   opacity: 0;
-  transition: opacity 0.2s;
-  z-index: -1;
+  transform: scale(0.72);
+  transition: opacity 0.16s ease-out, transform 0.24s ease-out;
+  z-index: 1;
   pointer-events: none;
 }
-.mascot-wrap.is-jolting .mascot-glow { opacity: 1; }
+.mascot-wrap.is-jolting .mascot-glow {
+  opacity: 1;
+  transform: scale(1.08);
+}
 .mascot-wrap:focus-visible {
   outline: 4px solid var(--mint);
   outline-offset: 8px;
@@ -645,7 +729,6 @@ body::after {
 
 
 /* ---------- Extra performance/accessibility polish ---------- */
-.mascot-wrap,
 .counter-block,
 .ca-bar,
 .chunk-btn,
@@ -661,6 +744,7 @@ body::after {
     transition-duration: 0.001ms !important;
   }
   body::after,
+  .mascot-wrap::before,
   .marquee__track,
   .flying-egg,
   .title,
