@@ -272,3 +272,13 @@ After replacing `vercel.json`, commit and push, then redeploy.
 - Loosened EGGMON title letter spacing so the white text + black stroke does not feel cramped.
 - Reduced the hero stroke slightly for cleaner readability.
 - Added responsive tracking adjustments so the title still fits on mobile.
+
+
+## v19 mobile overflow fix
+
+This version adds a defensive mobile overflow guard:
+- prevents horizontal scroll on `html` and `body`
+- keeps the huge stroked hero title inside the viewport on phones
+- removes risky mobile rotations/shadows from elements that can force sideways scroll
+- makes buttons, CA bar, lore card, and counter respect the viewport width
+- keeps desktop layout visually unchanged
