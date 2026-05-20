@@ -23,7 +23,7 @@ eggmon-site/
 └── README.md
 ```
 
-`R3tards-Regular.otf` is included in this package and must stay in the project root. The CSS expects it there.
+`R3tards-Regular.otf` should remain in your project root if you already use that custom font. This package does not include font files.
 
 
 ## Global counter setup on Vercel
@@ -265,3 +265,10 @@ After replacing `vercel.json`, commit and push, then redeploy.
 ## v17 update
 
 - Hero title and subtitle now use white fill with a black stroke for better contrast.
+
+
+## v18 changes
+
+- Loosened EGGMON title letter spacing so the white text + black stroke does not feel cramped.
+- Reduced the hero stroke slightly for cleaner readability.
+- Added responsive tracking adjustments so the title still fits on mobile.
