@@ -428,19 +428,42 @@
   const countEl = document.getElementById('count');
   const prompt = document.getElementById('prompt');
   const EMOJIS = ['💦', '🥚', '🤤', '😩', '💧', '👅'];
-  const COUNTER_API = '/api/count';
+  const COUNTER_API = `${window.location.origin}/api/count`;
+  const LOCAL_COUNTER_KEY = 'eggmon-local-clicks-v1';
 
   let count = 0;
   let lastPointerAt = 0;
+  let globalCounterOnline = false;
+  let warnedCounterOffline = false;
 
   function parseCounterValue(value) {
     const parsed = Number.parseInt(String(value ?? '0'), 10);
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
   }
 
-  function setCounter(value) {
+  function readLocalCount() {
+    try {
+      return parseCounterValue(localStorage.getItem(LOCAL_COUNTER_KEY));
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  function writeLocalCount(value) {
+    try {
+      localStorage.setItem(LOCAL_COUNTER_KEY, String(parseCounterValue(value)));
+    } catch (_) {}
+  }
+
+  function setCounter(value, { localFallback = false } = {}) {
     count = parseCounterValue(value);
-    if (countEl) countEl.textContent = count.toLocaleString();
+    if (countEl) {
+      countEl.textContent = count.toLocaleString();
+      countEl.title = localFallback
+        ? 'Local fallback count. Global backend is not syncing yet.'
+        : 'Global click count';
+      countEl.dataset.counterMode = localFallback ? 'local' : 'global';
+    }
     if (count > 0 && prompt) prompt.classList.add('is-hidden');
   }
 
@@ -451,7 +474,27 @@
     countEl.classList.add('is-popping');
   }
 
+  async function readCounterResponse(response) {
+    const text = await response.text();
+    let data = {};
+
+    try {
+      data = text ? JSON.parse(text) : {};
+    } catch (_) {
+      throw new Error(`Counter API returned non-JSON response: ${text.slice(0, 80)}`);
+    }
+
+    if (!response.ok || data.ok === false) {
+      throw new Error(data.error || `Counter API returned ${response.status}`);
+    }
+
+    return data;
+  }
+
   async function fetchGlobalCount() {
+    const localCount = readLocalCount();
+    if (localCount > 0) setCounter(localCount, { localFallback: true });
+
     try {
       const response = await fetch(COUNTER_API, {
         method: 'GET',
@@ -459,16 +502,18 @@
         headers: { 'Accept': 'application/json' },
       });
 
-      if (!response.ok) throw new Error(`Counter API returned ${response.status}`);
-
-      const data = await response.json();
+      const data = await readCounterResponse(response);
+      globalCounterOnline = true;
       setCounter(data.total);
     } catch (error) {
+      globalCounterOnline = false;
       console.warn('[EGGMON] Global counter unavailable:', error);
     }
   }
 
   async function syncGlobalClick(optimisticCount) {
+    writeLocalCount(optimisticCount);
+
     try {
       const response = await fetch(COUNTER_API, {
         method: 'POST',
@@ -476,17 +521,26 @@
         headers: { 'Accept': 'application/json' },
       });
 
-      if (!response.ok) throw new Error(`Counter API returned ${response.status}`);
-
-      const data = await response.json();
+      const data = await readCounterResponse(response);
       const serverCount = parseCounterValue(data.total);
+      globalCounterOnline = true;
+      warnedCounterOffline = false;
 
       // Avoid older, slower responses rolling the UI backwards after fast clicks.
       if (serverCount >= count || count <= optimisticCount) {
         setCounter(serverCount);
+        writeLocalCount(serverCount);
       }
     } catch (error) {
+      globalCounterOnline = false;
       console.warn('[EGGMON] Could not sync global click:', error);
+
+      if (!warnedCounterOffline) {
+        warnedCounterOffline = true;
+        showToast('GLOBAL COUNTER NOT SYNCING — CHECK /api/count');
+      }
+
+      setCounter(optimisticCount, { localFallback: true });
     }
   }
 

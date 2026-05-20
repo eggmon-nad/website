@@ -448,6 +448,16 @@ body::after {
   display: inline-block;
 }
 .counter-num.is-popping { animation: numpop 0.3s ease-out; }
+
+.counter-num[data-counter-mode="local"]::after {
+  content: " LOCAL";
+  font-size: 0.32em;
+  margin-left: 8px;
+  vertical-align: middle;
+  -webkit-text-stroke: 0;
+  opacity: 0.78;
+}
+
 @keyframes numpop {
   0%   { transform: scale(1); color: var(--mint); }
   50%  { transform: scale(1.5) rotate(8deg); color: var(--mint); }
