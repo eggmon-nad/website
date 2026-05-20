@@ -378,9 +378,8 @@
      ===================================================== */
   const SLIME_SRC = './sounds/slime-squish.mp3';
   const AUGH_SRC = './sounds/augh-meme.mp3';
-  const SLIME_POOL_SIZE = 10;
-  const slimePool = [];
-  let slimePoolIndex = 0;
+  const MAX_ACTIVE_SLIMES = 28;
+  const activeSlimes = new Set();
 
   function createAudio(src, volume) {
     const audio = new Audio(src);
@@ -389,44 +388,51 @@
     return audio;
   }
 
-  function ensureSlimePool() {
-    if (slimePool.length) return;
-    for (let i = 0; i < SLIME_POOL_SIZE; i++) {
-      slimePool.push(createAudio(SLIME_SRC, 0.46));
-    }
-  }
-
   function playSlimeStacked() {
     try {
-      ensureSlimePool();
-      const audio = slimePool[slimePoolIndex];
-      slimePoolIndex = (slimePoolIndex + 1) % slimePool.length;
+      // Use a fresh instance per click so the slime never gets restarted/cut by rapid clicking.
+      const audio = createAudio(SLIME_SRC, 0.48);
+      activeSlimes.add(audio);
 
-      audio.pause();
-      audio.currentTime = 0;
+      const cleanup = () => {
+        activeSlimes.delete(audio);
+        audio.removeEventListener('ended', cleanup);
+        audio.removeEventListener('error', cleanup);
+      };
+      audio.addEventListener('ended', cleanup);
+      audio.addEventListener('error', cleanup);
+
+      if (activeSlimes.size > MAX_ACTIVE_SLIMES) {
+        const oldest = activeSlimes.values().next().value;
+        if (oldest && oldest !== audio) {
+          try { oldest.pause(); } catch (_) {}
+          activeSlimes.delete(oldest);
+        }
+      }
+
       const playPromise = audio.play();
-      if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(() => {});
+      if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(cleanup);
     } catch (_) {}
   }
 
   function playAughFull() {
     try {
       const audio = createAudio(AUGH_SRC, 0.42);
-      const remove = () => {
-        audio.removeEventListener('ended', remove);
-        audio.removeEventListener('error', remove);
+      const cleanup = () => {
+        audio.removeEventListener('ended', cleanup);
+        audio.removeEventListener('error', cleanup);
       };
-      audio.addEventListener('ended', remove);
-      audio.addEventListener('error', remove);
+      audio.addEventListener('ended', cleanup);
+      audio.addEventListener('error', cleanup);
 
       const playPromise = audio.play();
-      if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(remove);
+      if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(cleanup);
     } catch (_) {}
   }
 
   function warmAudio() {
-    ensureSlimePool();
-    // Browsers unlock audio on user gesture; loading the milestone sound here avoids first-play lag.
+    // Browsers unlock audio on user gesture; preloading avoids first-play lag without starting sound.
+    createAudio(SLIME_SRC, 0.48).load();
     createAudio(AUGH_SRC, 0.42).load();
   }
 

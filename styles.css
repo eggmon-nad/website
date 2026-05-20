@@ -283,13 +283,14 @@ body::after {
   position: relative;
   z-index: 7;
   text-align: center;
-  margin-top: 10px;
+  margin-top: 12px;
+  width: min(100%, 980px);
 }
 .title {
   font-family: var(--shitfont);
-  font-size: clamp(82px, 17vw, 220px);
-  line-height: 0.82;
-  letter-spacing: -0.02em;
+  font-size: clamp(112px, 19vw, 280px);
+  line-height: 0.78;
+  letter-spacing: -0.035em;
   color: #5feddf;
   -webkit-text-stroke: var(--stroke-lg) var(--white);
   paint-order: stroke fill;
@@ -305,12 +306,15 @@ body::after {
   50%      { transform: rotate(-1deg) translateY(-6px); }
 }
 .subtitle {
-  font-size: clamp(20px, 2.9vw, 30px);
+  font-family: var(--shitfont);
+  font-size: clamp(30px, 4.5vw, 52px);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
   color: #5feddf;
-  -webkit-text-stroke: 1.5px var(--white);
+  -webkit-text-stroke: 1.75px var(--white);
   paint-order: stroke fill;
-  text-shadow: 2px 2px 0 var(--magenta);
-  margin-top: 10px;
+  text-shadow: 3px 3px 0 var(--magenta), 5px 5px 0 var(--black);
+  margin-top: 16px;
   transform: rotate(1deg);
 }
 @media (prefers-reduced-motion: reduce) {
@@ -672,7 +676,8 @@ body::after {
 /* Tablets and small desktops */
 @media (max-width: 900px) {
   .corner-sticker { width: 76px; height: 76px; font-size: 13px; }
-  .title { text-shadow: 3px 3px 0 var(--magenta), 7px 7px 0 var(--black); }
+  .title { font-size: clamp(104px, 21vw, 190px); text-shadow: 3px 3px 0 var(--magenta), 7px 7px 0 var(--black); }
+  .subtitle { font-size: clamp(28px, 5.2vw, 42px); }
 }
 
 /* Phones */
@@ -684,7 +689,8 @@ body::after {
   .marquee { font-size: 20px; letter-spacing: 1px; }
   .marquee__track > span { padding: 0 12px; }
 
-  .title { text-shadow: 3px 3px 0 var(--magenta), 6px 6px 0 var(--black); }
+  .title { font-size: clamp(106px, 29vw, 150px); text-shadow: 3px 3px 0 var(--magenta), 6px 6px 0 var(--black); }
+  .subtitle { font-size: clamp(28px, 7.1vw, 38px); margin-top: 12px; }
 
   .button-grid { flex-direction: column; width: 100%; max-width: 360px; }
   .chunk-btn { width: 100%; justify-content: center; }
@@ -706,13 +712,13 @@ body::after {
 /* Very small phones */
 @media (max-width: 360px) {
   .stage { padding-left: 12px; padding-right: 12px; }
-  .title { font-size: clamp(64px, 19vw, 92px); }
+  .title { font-size: clamp(94px, 28vw, 112px); }
 }
 
 /* Landscape phones — keep things compact */
 @media (max-height: 480px) and (orientation: landscape) {
   .stage { padding-top: 10px; gap: 10px; }
-  .title { font-size: clamp(56px, 9vw, 92px); }
+  .title { font-size: clamp(74px, 12vw, 112px); }
   .mascot-wrap { width: min(180px, 40vw); }
 }
 

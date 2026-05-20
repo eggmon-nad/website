@@ -252,3 +252,11 @@ After replacing `vercel.json`, commit and push, then redeploy.
 - Slime squish now plays on every mascot click.
 - Slime clicks use a small audio pool, so rapid clicks can overlap naturally instead of being rate-limited.
 - The AAAAUUUGHHHH milestone sound now triggers every 10 clicks and plays as a fresh full audio instance so it does not get cut off by later clicks.
+
+### v14 slime sound fix
+
+- Replaced `sounds/slime-squish.mp3` with the newly uploaded full slime MP3.
+- Re-encoded it to a browser-safe 44.1kHz MP3 so it plays more reliably on Vercel/browser audio.
+- Slime now uses a fresh audio instance on every click, so rapid clicks can overlap instead of restarting the same file.
+- The `AAAAUUUGHHHH` milestone sound still plays every 10 clicks as its own full instance.
+
