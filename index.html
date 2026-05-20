@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#694b87" />
+  <meta name="description" content="EGGMON ($EGG) — the only egg on Monad. Click him." />
+
+  <!-- Open Graph / Twitter card -->
+  <!-- Replace https://eggmon.fun with your live domain if your registered domain is different. -->
+  <meta property="og:title" content="$EGGMON — the only egg that matters" />
+  <meta property="og:description" content="The only egg on Monad. Click him." />
+  <meta property="og:image" content="https://eggmon.fun/og-image.jpg" />
+  <meta property="og:url" content="https://eggmon.fun/" />
+  <meta property="og:type" content="website" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="$EGGMON — the only egg that matters" />
+  <meta name="twitter:description" content="The only egg on Monad. Click him." />
+  <meta name="twitter:image" content="https://eggmon.fun/og-image.jpg" />
+  <link rel="canonical" href="https://eggmon.fun/" />
+
+  <title>$EGGMON — the only egg that matters</title>
+
+  <link rel="icon" type="image/png" href="./favicon.png" />
+  <link rel="apple-touch-icon" href="./favicon.png" />
+  <link rel="preload" href="./R3tards-Regular.otf" as="font" type="font/otf" crossorigin />
+  <link rel="preload" href="./eggmon.webp" as="image" type="image/webp" fetchpriority="high" />
+  <link rel="preload" href="./sounds/slime-squish.mp3" as="audio" type="audio/mpeg" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- Decorative floating eggmons in the background -->
+  <div class="flying-eggs" aria-hidden="true">
+    <div class="flying-egg e1"></div>
+    <div class="flying-egg e2"></div>
+    <div class="flying-egg e3"></div>
+    <div class="flying-egg e4"></div>
+    <div class="flying-egg e5"></div>
+    <div class="flying-egg e6"></div>
+  </div>
+
+  <!-- Canvas for the liquid particle effects -->
+  <canvas id="fx-canvas" aria-hidden="true"></canvas>
+
+  <!-- Corner stickers -->
+  <div class="corner-sticker corner-sticker--left" aria-hidden="true">
+    <span>NOT A<br />SECURITY</span>
+  </div>
+  <div class="corner-sticker corner-sticker--right" aria-hidden="true">
+    <span>100x<br />SOON</span>
+  </div>
+
+  <!-- Top scrolling banner -->
+  <div class="marquee marquee--top" aria-hidden="true">
+    <div class="marquee__track">
+      <span>🥚 $EGG &nbsp;·&nbsp; EGGMON &nbsp;·&nbsp; ON MONAD &nbsp;·&nbsp;</span>
+      <span>🥚 $EGG &nbsp;·&nbsp; EGGMON &nbsp;·&nbsp; ON MONAD &nbsp;·&nbsp;</span>
+      <span>🥚 $EGG &nbsp;·&nbsp; EGGMON &nbsp;·&nbsp; ON MONAD &nbsp;·&nbsp;</span>
+      <span>🥚 $EGG &nbsp;·&nbsp; EGGMON &nbsp;·&nbsp; ON MONAD &nbsp;·&nbsp;</span>
+    </div>
+  </div>
+
+  <main class="stage">
+    <header class="title-block">
+      <h1 class="title">EGGMON</h1>
+      <p class="subtitle">the only egg on monad &nbsp;·&nbsp; ticker: $EGG</p>
+    </header>
+
+    <div class="click-prompt" id="prompt" aria-hidden="true">
+      <span>👇</span><span>CLICK HIM</span><span>👇</span>
+    </div>
+
+    <button type="button" class="mascot-wrap" id="mascot" aria-label="Click eggmon to interact">
+      <span class="mascot-glow" aria-hidden="true"></span>
+      <picture class="mascot-picture">
+        <source srcset="./eggmon.webp" type="image/webp" />
+        <img src="./eggmon.png" alt="Eggmon, the purple mascot of $EGG" class="mascot-img" width="198" height="296" decoding="async" fetchpriority="high" draggable="false" />
+      </picture>
+    </button>
+
+    <div class="counter-block">
+      <span class="counter-label">💦 COUNT</span>
+      <span class="counter-num" id="count">0</span>
+    </div>
+
+    <div class="ca-bar" role="button" tabindex="0" aria-label="Contract address. Click to copy.">
+      <span class="ca-label">CA</span>
+      <span class="ca-chain">MONAD</span>
+      <span class="ca-text" id="ca">0xD10cf12099f5Fb424Bc77401DF49f0c785657777</span>
+      <button type="button" class="copy-btn" id="copy" aria-label="Copy contract address">COPY</button>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <nav class="button-grid" aria-label="Links">
+      <a class="chunk-btn chunk-btn--primary"
+         href="https://nad.fun/tokens/0xD10cf12099f5Fb424Bc77401DF49f0c785657777"
+         target="_blank" rel="noopener noreferrer">
+        💜 BUY ON NAD.FUN
+      </a>
+      <a class="chunk-btn chunk-btn--secondary"
+         href="https://x.com/eggmonad"
+         target="_blank" rel="noopener noreferrer">
+        𝕏 TWITTER
+      </a>
+      <a class="chunk-btn chunk-btn--share"
+         href="https://twitter.com/intent/tweet?text=I%20found%20the%20only%20egg%20on%20Monad%20%F0%9F%A5%9A%20%24EGG&url=https%3A%2F%2Feggmon.fun%2F"
+         target="_blank" rel="noopener noreferrer">
+        SHARE ON 𝕏
+      </a>
+    </nav>
+
+    <section class="lore-card" aria-label="Eggmon lore">
+      <p>Born from the deepest yolk of Monad, EGGMON exists for one reason: to be clicked, copied, bought, and spiritually misunderstood.</p>
+    </section>
+
+    <footer class="disclaimer">
+      <p>$EGG is a memecoin with no intrinsic value, expectation of financial return, or formal team.</p>
+      <p class="disclaimer__tiny">do your own research &nbsp;·&nbsp; probably nothing</p>
+    </footer>
+  </main>
+
+  <!-- Bottom scrolling banner -->
+  <div class="marquee marquee--bottom" aria-hidden="true">
+    <div class="marquee__track">
+      <span>💦 EGGMON SEASON &nbsp;·&nbsp; BUY THE EGG &nbsp;·&nbsp;</span>
+      <span>💦 EGGMON SEASON &nbsp;·&nbsp; BUY THE EGG &nbsp;·&nbsp;</span>
+      <span>💦 EGGMON SEASON &nbsp;·&nbsp; BUY THE EGG &nbsp;·&nbsp;</span>
+      <span>💦 EGGMON SEASON &nbsp;·&nbsp; BUY THE EGG &nbsp;·&nbsp;</span>
+    </div>
+  </div>
+
+  <div class="mobile-buy-bar" aria-label="Quick actions">
+    <a href="https://nad.fun/tokens/0xD10cf12099f5Fb424Bc77401DF49f0c785657777"
+       target="_blank"
+       rel="noopener noreferrer">
+      BUY $EGG
+    </a>
+    <button type="button" id="copyMobile">COPY CA</button>
+  </div>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>
