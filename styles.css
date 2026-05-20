@@ -291,12 +291,10 @@ body::after {
   font-size: clamp(112px, 19vw, 280px);
   line-height: 0.78;
   letter-spacing: -0.035em;
-  color: #5feddf;
-  -webkit-text-stroke: var(--stroke-lg) var(--white);
-  paint-order: stroke fill;
-  text-shadow:
-    5px 5px 0 var(--magenta),
-    10px 10px 0 var(--black);
+  color: var(--black);
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+  text-shadow: none;
   transform: rotate(-3deg);
   animation: wobble 4s ease-in-out infinite;
   user-select: none;
@@ -310,10 +308,10 @@ body::after {
   font-size: clamp(30px, 4.5vw, 52px);
   line-height: 0.95;
   letter-spacing: -0.01em;
-  color: #5feddf;
-  -webkit-text-stroke: 1.75px var(--white);
-  paint-order: stroke fill;
-  text-shadow: 3px 3px 0 var(--magenta), 5px 5px 0 var(--black);
+  color: var(--black);
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+  text-shadow: none;
   margin-top: 16px;
   transform: rotate(1deg);
 }
@@ -676,7 +674,7 @@ body::after {
 /* Tablets and small desktops */
 @media (max-width: 900px) {
   .corner-sticker { width: 76px; height: 76px; font-size: 13px; }
-  .title { font-size: clamp(104px, 21vw, 190px); text-shadow: 3px 3px 0 var(--magenta), 7px 7px 0 var(--black); }
+  .title { font-size: clamp(104px, 21vw, 190px); text-shadow: none; }
   .subtitle { font-size: clamp(28px, 5.2vw, 42px); }
 }
 
@@ -689,7 +687,7 @@ body::after {
   .marquee { font-size: 20px; letter-spacing: 1px; }
   .marquee__track > span { padding: 0 12px; }
 
-  .title { font-size: clamp(106px, 29vw, 150px); text-shadow: 3px 3px 0 var(--magenta), 6px 6px 0 var(--black); }
+  .title { font-size: clamp(106px, 29vw, 150px); text-shadow: none; }
   .subtitle { font-size: clamp(28px, 7.1vw, 38px); margin-top: 12px; }
 
   .button-grid { flex-direction: column; width: 100%; max-width: 360px; }
