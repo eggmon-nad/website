@@ -373,38 +373,35 @@
 
   /* =====================================================
      SOUND EFFECTS
-     - one clean channel per sound to prevent crunchy overlap
-     - rate-limited so rapid clicks still feel responsive without glitching
+     - slime stacks on every mascot click using a small audio pool
+     - augh triggers every 10 clicks and is never cut off/restarted
      ===================================================== */
-  const soundChannels = {
-    slime: { audio: null, src: './sounds/slime-squish.mp3', volume: 0.42, lastPlayedAt: 0, minGap: 90 },
-    augh:  { audio: null, src: './sounds/augh-meme.mp3',    volume: 0.34, lastPlayedAt: 0, minGap: 1400 },
-  };
+  const SLIME_SRC = './sounds/slime-squish.mp3';
+  const AUGH_SRC = './sounds/augh-meme.mp3';
+  const SLIME_POOL_SIZE = 10;
+  const slimePool = [];
+  let slimePoolIndex = 0;
 
-  function getSoundChannel(name) {
-    const channel = soundChannels[name];
-    if (!channel) return null;
-
-    if (!channel.audio) {
-      const audio = new Audio(channel.src);
-      audio.preload = 'auto';
-      audio.volume = channel.volume;
-      channel.audio = audio;
-    }
-
-    return channel;
+  function createAudio(src, volume) {
+    const audio = new Audio(src);
+    audio.preload = 'auto';
+    audio.volume = volume;
+    return audio;
   }
 
-  function restartSound(name, { force = false } = {}) {
-    const channel = getSoundChannel(name);
-    if (!channel) return;
+  function ensureSlimePool() {
+    if (slimePool.length) return;
+    for (let i = 0; i < SLIME_POOL_SIZE; i++) {
+      slimePool.push(createAudio(SLIME_SRC, 0.46));
+    }
+  }
 
-    const now = performance.now();
-    if (!force && now - channel.lastPlayedAt < channel.minGap) return;
-    channel.lastPlayedAt = now;
-
+  function playSlimeStacked() {
     try {
-      const audio = channel.audio;
+      ensureSlimePool();
+      const audio = slimePool[slimePoolIndex];
+      slimePoolIndex = (slimePoolIndex + 1) % slimePool.length;
+
       audio.pause();
       audio.currentTime = 0;
       const playPromise = audio.play();
@@ -412,17 +409,33 @@
     } catch (_) {}
   }
 
+  function playAughFull() {
+    try {
+      const audio = createAudio(AUGH_SRC, 0.42);
+      const remove = () => {
+        audio.removeEventListener('ended', remove);
+        audio.removeEventListener('error', remove);
+      };
+      audio.addEventListener('ended', remove);
+      audio.addEventListener('error', remove);
+
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(remove);
+    } catch (_) {}
+  }
+
   function warmAudio() {
-    getSoundChannel('slime');
-    getSoundChannel('augh');
+    ensureSlimePool();
+    // Browsers unlock audio on user gesture; loading the milestone sound here avoids first-play lag.
+    createAudio(AUGH_SRC, 0.42).load();
   }
 
   window.addEventListener('pointerdown', warmAudio, { once: true, passive: true });
 
   function playEggSound(nextCount) {
-    restartSound('slime');
+    playSlimeStacked();
     if (nextCount > 0 && nextCount % 10 === 0) {
-      window.setTimeout(() => restartSound('augh', { force: true }), 140);
+      window.setTimeout(playAughFull, 80);
     }
   }
 
