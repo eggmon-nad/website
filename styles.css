@@ -626,6 +626,11 @@ body::after {
   color: var(--text);
   transform: rotate(1.5deg);
 }
+.chunk-btn--dex {
+  background: #5feddf;
+  color: var(--text);
+  transform: rotate(0.8deg);
+}
 .chunk-btn--share {
   background: var(--pink);
   color: var(--text);
