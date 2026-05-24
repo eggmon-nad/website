@@ -636,6 +636,16 @@ body::after {
   color: var(--text);
   transform: rotate(-0.6deg);
 }
+.chunk-btn--gecko {
+  background: var(--white);
+  color: var(--text);
+  transform: rotate(1deg);
+}
+.chunk-btn--info {
+  background: var(--black);
+  color: var(--white);
+  transform: rotate(-1deg);
+}
 .chunk-btn:hover  { transform: rotate(0) scale(1.05); box-shadow: 9px 9px 0 var(--black); }
 .chunk-btn:active { transform: rotate(0) scale(0.98); box-shadow: 2px 2px 0 var(--black); }
 
@@ -657,6 +667,67 @@ body::after {
   paint-order: stroke fill;
 }
 
+
+/* ---------- Clean token info card ---------- */
+.token-info-card {
+  width: 100%;
+  max-width: 660px;
+  margin-top: 2px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 4px solid var(--black);
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 5px 5px 0 var(--magenta);
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 1.35;
+  scroll-margin-top: 80px;
+}
+.token-info-card__eyebrow {
+  display: inline-flex;
+  margin-bottom: 8px;
+  background: var(--mint);
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  padding: 4px 10px;
+  box-shadow: 3px 3px 0 var(--black);
+  font-size: clamp(14px, 1.8vw, 16px);
+  transform: rotate(-1.5deg);
+}
+.token-info-card h2 {
+  font-size: clamp(24px, 3vw, 32px);
+  margin-bottom: 8px;
+  color: var(--magenta);
+  -webkit-text-stroke: 0.6px var(--white);
+  paint-order: stroke fill;
+}
+.token-info-card__intro,
+.token-info-card__note {
+  margin-bottom: 12px;
+}
+.token-info-card__note {
+  margin-bottom: 0;
+  font-size: 0.9em;
+}
+.token-info-card dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 14px;
+  margin-bottom: 12px;
+}
+.token-info-card div {
+  min-width: 0;
+}
+.token-info-card dt {
+  font-size: 0.78em;
+  color: var(--magenta);
+}
+.token-info-card dd {
+  overflow-wrap: anywhere;
+}
+.token-info-card a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
 
 /* ---------- Disclaimer ---------- */
 .disclaimer {
@@ -711,6 +782,7 @@ body::after {
   .button-grid,
   .ca-bar,
   .lore-card,
+  .token-info-card,
   .disclaimer {
     max-width: 100%;
   }
@@ -780,6 +852,8 @@ body::after {
 
   .flying-egg { width: clamp(82px, 21vw, 112px); }
   .flying-egg.e5, .flying-egg.e6 { display: none; }
+  .token-info-card { max-width: 360px; padding: 14px 16px; }
+  .token-info-card dl { grid-template-columns: 1fr; }
 }
 
 /* Very small phones */
@@ -802,7 +876,8 @@ body::after {
 .counter-block,
 .ca-bar,
 .chunk-btn,
-.lore-card {
+.lore-card,
+.token-info-card {
   contain: layout paint;
 }
 
