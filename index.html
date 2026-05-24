@@ -92,6 +92,34 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+    <section class="live-stack" aria-label="Live EGGMON stats">
+      <article class="market-card" aria-live="polite">
+        <div class="market-card__top">
+          <span class="market-card__eyebrow">Live $EGG stats</span>
+          <span class="market-card__status" id="market-status">Loading</span>
+        </div>
+        <div class="market-card__price" id="market-price">--</div>
+        <div class="market-card__grid">
+          <div><span>Market Cap</span><strong id="market-cap">--</strong></div>
+          <div><span>24h Volume</span><strong id="market-volume">--</strong></div>
+          <div><span>Liquidity</span><strong id="market-liquidity">--</strong></div>
+          <div><span>24h Change</span><strong id="market-change">--</strong></div>
+        </div>
+        <a class="market-card__source" href="https://dexscreener.com/monad/0xd57e82e32ff8bdb26d5984e4e73c14c2145d8ed4" target="_blank" rel="noopener noreferrer">Source: Dexscreener</a>
+      </article>
+
+      <article class="blast-card" aria-live="polite">
+        <div class="blast-card__top">
+          <span>Cum Blast Status</span>
+          <strong id="blast-status">WARMING UP</strong>
+        </div>
+        <div class="blast-meter" aria-hidden="true">
+          <span class="blast-meter__fill" id="blast-meter-fill"></span>
+        </div>
+        <p class="blast-card__detail" id="blast-detail">0 / 690 pressure built</p>
+      </article>
+    </section>
+
     <nav class="button-grid" aria-label="Links">
       <a class="chunk-btn chunk-btn--primary"
          href="https://nad.fun/tokens/0xD10cf12099f5Fb424Bc77401DF49f0c785657777"
@@ -113,6 +141,12 @@
          target="_blank" rel="noopener noreferrer">
         𝕏 TWITTER
       </a>
+      <button type="button" class="chunk-btn chunk-btn--wallet" id="add-wallet">
+        🦊 ADD $EGG TO WALLET
+      </button>
+      <button type="button" class="chunk-btn chunk-btn--faq" id="faq-open" aria-haspopup="dialog" aria-controls="faq-modal" aria-expanded="false">
+        ❓ FAQ
+      </button>
       <button type="button" class="chunk-btn chunk-btn--info" id="token-info-open" aria-haspopup="dialog" aria-controls="token-info-modal" aria-expanded="false">
         📄 TOKEN INFO
       </button>
@@ -148,6 +182,38 @@
         <div><dt>GeckoTerminal</dt><dd><a href="https://www.geckoterminal.com/monad/tokens/0xd10cf12099f5fb424bc77401df49f0c785657777" target="_blank" rel="noopener">View $EGG</a></dd></div>
       </dl>
       <p class="token-info-card__note">All trading and supply details should be verified on-chain and through active Monad pools. $EGG has no intrinsic value and no expectation of financial return.</p>
+    </section>
+  </div>
+
+  <div class="token-info-modal" id="faq-modal" aria-hidden="true" hidden>
+    <div class="token-info-modal__backdrop" data-faq-close aria-hidden="true"></div>
+    <section class="token-info-card token-info-card--modal faq-card" id="faq-dialog" role="dialog" aria-modal="true" aria-labelledby="faq-title" aria-describedby="faq-description" tabindex="-1">
+      <button type="button" class="token-info-card__close" data-faq-close aria-label="Close FAQ">×</button>
+      <div class="token-info-card__eyebrow">Tiny FAQ</div>
+      <h2 id="faq-title">Questions before touching the egg.</h2>
+      <p class="token-info-card__intro" id="faq-description">Fast answers for humans, wallets, and listing reviewers.</p>
+      <div class="faq-list">
+        <article>
+          <h3>What is EGGMON?</h3>
+          <p>A Monad-native community memecoin. It is stupid on purpose, but the links and contract are official.</p>
+        </article>
+        <article>
+          <h3>Where can I buy $EGG?</h3>
+          <p>Use the Nad.fun button on this site and always verify the contract before trading.</p>
+        </article>
+        <article>
+          <h3>What is the contract?</h3>
+          <p>0xD10cf12099f5Fb424Bc77401DF49f0c785657777</p>
+        </article>
+        <article>
+          <h3>Is this financial advice?</h3>
+          <p>No. $EGG has no intrinsic value and no expectation of financial return.</p>
+        </article>
+        <article>
+          <h3>Why does it look like that?</h3>
+          <p>Because Monad needed an egg and the timeline needed a problem.</p>
+        </article>
+      </div>
     </section>
   </div>
 

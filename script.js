@@ -458,6 +458,28 @@
   const EMOJIS = ['💦', '🥚', '🤤', '😩', '💧', '👅'];
   const COUNTER_API = `${window.location.origin}/api/count`;
   const LOCAL_COUNTER_KEY = 'eggmon-local-clicks-v1';
+  const TOKEN_ADDRESS = '0xD10cf12099f5Fb424Bc77401DF49f0c785657777';
+  const TOKEN_SYMBOL = 'EGG';
+  const TOKEN_DECIMALS = 18;
+  const TOKEN_IMAGE_URL = `${window.location.origin}/favicon.png`;
+  const DEXSCREENER_PAIR_API = 'https://api.dexscreener.com/latest/dex/pairs/monad/0xd57e82e32ff8bdb26d5984e4e73c14c2145d8ed4';
+  const MARKET_REFRESH_MS = 60_000;
+  const BLAST_CYCLE = 690;
+
+  const marketEls = {
+    status: document.getElementById('market-status'),
+    price: document.getElementById('market-price'),
+    cap: document.getElementById('market-cap'),
+    volume: document.getElementById('market-volume'),
+    liquidity: document.getElementById('market-liquidity'),
+    change: document.getElementById('market-change'),
+  };
+
+  const blastEls = {
+    status: document.getElementById('blast-status'),
+    fill: document.getElementById('blast-meter-fill'),
+    detail: document.getElementById('blast-detail'),
+  };
 
   let count = 0;
   let lastPointerAt = 0;
@@ -483,6 +505,90 @@
     } catch (_) {}
   }
 
+  function formatUsd(value, { compact = true, maxFractionDigits = 2 } = {}) {
+    const number = Number(value);
+    if (!Number.isFinite(number) || number <= 0) return '--';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: compact ? 'compact' : 'standard',
+      maximumFractionDigits: maxFractionDigits,
+    }).format(number);
+  }
+
+  function formatTokenPrice(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number) || number <= 0) return '--';
+    if (number < 0.000001) return `$${number.toExponential(2)}`;
+    if (number < 0.01) return `$${number.toLocaleString('en-US', { maximumFractionDigits: 8 })}`;
+    return formatUsd(number, { compact: false, maxFractionDigits: 6 });
+  }
+
+  function formatPercent(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return '--';
+    const sign = number > 0 ? '+' : '';
+    return `${sign}${number.toFixed(2)}%`;
+  }
+
+  function setMarketStatus(text, mode = '') {
+    if (!marketEls.status) return;
+    marketEls.status.textContent = text;
+    marketEls.status.classList.toggle('is-live', mode === 'live');
+    marketEls.status.classList.toggle('is-error', mode === 'error');
+  }
+
+  async function fetchMarketStats() {
+    if (!marketEls.price) return;
+    setMarketStatus('Updating');
+
+    try {
+      const response = await fetch(DEXSCREENER_PAIR_API, {
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' },
+      });
+      if (!response.ok) throw new Error(`Dexscreener returned ${response.status}`);
+
+      const data = await response.json();
+      const pair = data.pair || (Array.isArray(data.pairs) ? data.pairs[0] : null);
+      if (!pair) throw new Error('No $EGG pair found');
+
+      const marketCap = pair.marketCap || pair.fdv;
+      marketEls.price.textContent = formatTokenPrice(pair.priceUsd);
+      marketEls.cap.textContent = formatUsd(marketCap);
+      marketEls.volume.textContent = formatUsd(pair.volume?.h24);
+      marketEls.liquidity.textContent = formatUsd(pair.liquidity?.usd);
+      marketEls.change.textContent = formatPercent(pair.priceChange?.h24);
+      setMarketStatus('Live', 'live');
+    } catch (error) {
+      console.warn('[EGGMON] Market stats unavailable:', error);
+      setMarketStatus('Retrying', 'error');
+      marketEls.price.textContent = marketEls.price.textContent === '--' ? 'Stats sleeping' : marketEls.price.textContent;
+    }
+  }
+
+  function getBlastState(total) {
+    const safeTotal = parseCounterValue(total);
+    const rawCycle = safeTotal % BLAST_CYCLE;
+    const cycleCount = safeTotal > 0 && rawCycle === 0 ? BLAST_CYCLE : rawCycle;
+    const progress = safeTotal > 0 ? Math.max(2, Math.min(100, (cycleCount / BLAST_CYCLE) * 100)) : 0;
+
+    let label = 'WARMING UP';
+    if (progress >= 88) label = '🚨 RELEASE IMMINENT';
+    else if (progress >= 66) label = 'DANGEROUSLY LOADED';
+    else if (progress >= 33) label = 'PRESSURE RISING';
+
+    return { cycleCount, progress, label };
+  }
+
+  function updateBlastStatus(total) {
+    if (!blastEls.status || !blastEls.fill || !blastEls.detail) return;
+    const state = getBlastState(total);
+    blastEls.status.textContent = state.label;
+    blastEls.fill.style.width = `${state.progress}%`;
+    blastEls.detail.textContent = `${state.cycleCount.toLocaleString()} / ${BLAST_CYCLE.toLocaleString()} pressure built`;
+  }
+
   function setCounter(value, { localFallback = false } = {}) {
     count = parseCounterValue(value);
     if (countEl) {
@@ -492,6 +598,7 @@
         : 'Global click count';
       countEl.dataset.counterMode = localFallback ? 'local' : 'global';
     }
+    updateBlastStatus(count);
     if (count > 0 && prompt) prompt.classList.add('is-hidden');
   }
 
@@ -608,6 +715,9 @@
   }
 
   fetchGlobalCount();
+  updateBlastStatus(count);
+  fetchMarketStats();
+  window.setInterval(fetchMarketStats, MARKET_REFRESH_MS);
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) flushGlobalClicks({ keepalive: true });
@@ -793,6 +903,70 @@
   });
 
   /* =====================================================
+     FAQ MODAL
+     ===================================================== */
+  const faqOpen = document.getElementById('faq-open');
+  const faqModal = document.getElementById('faq-modal');
+  const faqDialog = document.getElementById('faq-dialog');
+  const faqCloseTriggers = document.querySelectorAll('[data-faq-close]');
+  let lastFaqFocus = null;
+
+  function isFaqOpen() {
+    return faqModal && faqModal.classList.contains('is-open');
+  }
+
+  function openFaq() {
+    if (!faqModal || !faqDialog) return;
+    faqModal.hidden = false;
+    faqOpen?.setAttribute('aria-expanded', 'true');
+    lastFaqFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    faqModal.classList.add('is-open');
+    faqModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('has-token-info-modal');
+    requestAnimationFrame(() => faqDialog.focus({ preventScroll: true }));
+  }
+
+  function closeFaq() {
+    if (!faqModal || !faqDialog) return;
+    faqModal.classList.remove('is-open');
+    faqModal.setAttribute('aria-hidden', 'true');
+    faqOpen?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('has-token-info-modal');
+    window.setTimeout(() => {
+      if (!faqModal.classList.contains('is-open')) faqModal.hidden = true;
+    }, 160);
+    if (lastFaqFocus && typeof lastFaqFocus.focus === 'function') {
+      lastFaqFocus.focus({ preventScroll: true });
+    }
+  }
+
+  function trapFaqFocus(e) {
+    if (!isFaqOpen() || e.key !== 'Tab' || !faqDialog) return;
+    const focusable = Array.from(faqDialog.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  if (faqOpen) faqOpen.addEventListener('click', openFaq);
+  faqCloseTriggers.forEach((trigger) => trigger.addEventListener('click', closeFaq));
+
+  document.addEventListener('keydown', (e) => {
+    if (!isFaqOpen()) return;
+    if (e.key === 'Escape') closeFaq();
+    trapFaqFocus(e);
+  });
+
+  /* =====================================================
      COPY CONTRACT ADDRESS
      ===================================================== */
   const copyBtn = document.getElementById('copy');
@@ -810,6 +984,36 @@
       toast.classList.remove('is-visible');
     }, 1800);
   }
+
+  async function addEggToWallet() {
+    const provider = window.ethereum;
+    if (!provider || typeof provider.request !== 'function') {
+      showToast('OPEN IN A WEB3 WALLET TO ADD $EGG');
+      return;
+    }
+
+    try {
+      const wasAdded = await provider.request({
+        method: 'wallet_watchAsset',
+        params: {
+          type: 'ERC20',
+          options: {
+            address: TOKEN_ADDRESS,
+            symbol: TOKEN_SYMBOL,
+            decimals: TOKEN_DECIMALS,
+            image: TOKEN_IMAGE_URL,
+          },
+        },
+      });
+      showToast(wasAdded ? '$EGG ADDED TO WALLET' : 'WALLET DID NOT ADD $EGG');
+    } catch (error) {
+      console.warn('[EGGMON] Could not add token to wallet:', error);
+      showToast('WALLET ADD FAILED — COPY CA INSTEAD');
+    }
+  }
+
+  const addWalletBtn = document.getElementById('add-wallet');
+  if (addWalletBtn) addWalletBtn.addEventListener('click', addEggToWallet);
 
   async function copyContract(triggerBtn) {
     const text = caText.textContent.trim();

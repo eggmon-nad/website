@@ -1223,3 +1223,204 @@ a {
     max-height: calc(100svh - 18px);
   }
 }
+
+/* =========================================================
+   Feature layer: live stats, Cum Blast Status, FAQ, wallet UX
+   ========================================================= */
+.live-stack {
+  width: 100%;
+  max-width: 720px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(220px, 0.75fr);
+  gap: 14px;
+  align-items: stretch;
+  margin-top: 2px;
+}
+.market-card,
+.blast-card {
+  background: var(--white);
+  color: var(--text);
+  border: 4px solid var(--black);
+  border-radius: 18px;
+  box-shadow: 6px 6px 0 var(--black);
+  padding: 14px;
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+}
+.market-card {
+  transform: rotate(-0.35deg);
+}
+.blast-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transform: rotate(0.5deg);
+}
+.market-card__top,
+.blast-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.market-card__eyebrow,
+.market-card__status {
+  display: inline-flex;
+  align-items: center;
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  padding: 4px 9px;
+  font-size: clamp(12px, 1.7vw, 15px);
+  line-height: 1;
+}
+.market-card__eyebrow {
+  background: var(--mint);
+}
+.market-card__status {
+  background: var(--white);
+  box-shadow: 2px 2px 0 var(--black);
+}
+.market-card__status.is-live {
+  background: var(--mint);
+}
+.market-card__status.is-error {
+  background: var(--pink);
+}
+.market-card__price {
+  font-size: clamp(28px, 5vw, 44px);
+  line-height: 0.95;
+  letter-spacing: 0.02em;
+  margin-bottom: 12px;
+  overflow-wrap: anywhere;
+}
+.market-card__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.market-card__grid div {
+  min-width: 0;
+  border: 3px solid var(--black);
+  border-radius: 12px;
+  padding: 8px;
+  background: rgba(255, 253, 240, 0.72);
+}
+.market-card__grid span,
+.blast-card__detail {
+  display: block;
+  font-size: clamp(12px, 1.7vw, 14px);
+  opacity: 0.78;
+}
+.market-card__grid strong {
+  display: block;
+  margin-top: 2px;
+  font-size: clamp(17px, 2.4vw, 23px);
+  line-height: 1.05;
+  overflow-wrap: anywhere;
+}
+.market-card__source {
+  display: inline-flex;
+  margin-top: 10px;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.blast-card__top {
+  align-items: flex-start;
+  margin-bottom: 12px;
+}
+.blast-card__top span {
+  font-size: clamp(18px, 2.5vw, 24px);
+  line-height: 1;
+}
+.blast-card__top strong {
+  text-align: right;
+  font-size: clamp(18px, 2.35vw, 24px);
+  line-height: 1;
+  color: var(--magenta);
+}
+.blast-meter {
+  width: 100%;
+  height: 22px;
+  background: rgba(0, 0, 0, 0.12);
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 2px 2px 0 rgba(0,0,0,0.15);
+}
+.blast-meter__fill {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, var(--mint), var(--pink), var(--magenta));
+  border-right: 3px solid var(--black);
+  transition: width 0.28s ease;
+}
+.blast-card__detail {
+  margin-top: 9px;
+}
+.faq-list {
+  display: grid;
+  gap: 10px;
+}
+.faq-list article {
+  border: 3px solid var(--black);
+  border-radius: 14px;
+  background: rgba(255, 253, 240, 0.72);
+  padding: 10px 12px;
+}
+.faq-list h3 {
+  font-size: clamp(17px, 2.2vw, 21px);
+  margin-bottom: 4px;
+  color: var(--magenta);
+}
+.faq-list p {
+  font-size: clamp(14px, 1.9vw, 17px);
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.chunk-btn--wallet,
+.chunk-btn--faq {
+  background: var(--white);
+  color: var(--text);
+  transform: rotate(1deg);
+}
+
+@media (max-width: 760px) {
+  .live-stack {
+    grid-template-columns: 1fr;
+    max-width: min(420px, 100%);
+    gap: 12px;
+  }
+  .market-card,
+  .blast-card {
+    transform: none;
+    padding: 12px;
+  }
+  .market-card__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+  }
+  .market-card__grid div {
+    padding: 7px;
+  }
+  .blast-card__top strong {
+    max-width: 52%;
+  }
+}
+
+@media (max-width: 420px) {
+  .market-card__top,
+  .blast-card__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .blast-card__top strong {
+    text-align: left;
+    max-width: 100%;
+  }
+  .market-card__grid {
+    grid-template-columns: 1fr;
+  }
+}
