@@ -108,16 +108,21 @@
         <a class="market-card__source" href="https://dexscreener.com/monad/0xd57e82e32ff8bdb26d5984e4e73c14c2145d8ed4" target="_blank" rel="noopener noreferrer">Source: Dexscreener</a>
       </article>
 
-      <article class="blast-card" aria-live="polite">
-        <div class="blast-card__top">
-          <span>Cum Blast Status</span>
-          <strong id="blast-status">WARMING UP</strong>
-        </div>
-        <div class="blast-meter" aria-hidden="true">
-          <span class="blast-meter__fill" id="blast-meter-fill"></span>
-        </div>
-        <p class="blast-card__detail" id="blast-detail">0 / 690 pressure built</p>
-      </article>
+      <div class="blast-side">
+        <article class="blast-card" aria-live="polite">
+          <div class="blast-card__top">
+            <span>Cum Blast Status</span>
+            <strong id="blast-status">WARMING UP</strong>
+          </div>
+          <div class="blast-meter" aria-hidden="true">
+            <span class="blast-meter__fill" id="blast-meter-fill"></span>
+          </div>
+          <p class="blast-card__detail" id="blast-detail">0 / 690 pressure built</p>
+        </article>
+        <button type="button" class="chunk-btn chunk-btn--wallet wallet-panel-button" id="add-wallet">
+          🦊 ADD $EGG TO WALLET
+        </button>
+      </div>
     </section>
 
     <nav class="button-grid" aria-label="Links">
@@ -141,9 +146,6 @@
          target="_blank" rel="noopener noreferrer">
         𝕏 TWITTER
       </a>
-      <button type="button" class="chunk-btn chunk-btn--wallet" id="add-wallet">
-        🦊 ADD $EGG TO WALLET
-      </button>
       <button type="button" class="chunk-btn chunk-btn--faq" id="faq-open" aria-haspopup="dialog" aria-controls="faq-modal" aria-expanded="false">
         ❓ FAQ
       </button>

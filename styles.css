@@ -2209,3 +2209,113 @@ a {
   line-height: 0.92 !important;
   padding: 7px 14px !important;
 }
+
+/* ---------- Green live stats glow ---------- */
+.market-card__status.is-live {
+  background: #76ff8f !important;
+  color: #000000 !important;
+  border-color: var(--black) !important;
+  box-shadow:
+    2px 2px 0 var(--black),
+    0 0 10px rgba(118, 255, 143, 0.52),
+    0 0 18px rgba(118, 255, 143, 0.28) !important;
+  animation: live-green-glow 2.4s ease-in-out infinite;
+}
+
+.market-card__status.is-live::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-right: 7px;
+  border-radius: 999px;
+  background: #00d63d;
+  box-shadow: 0 0 8px rgba(0, 214, 61, 0.75);
+}
+
+@keyframes live-green-glow {
+  0%, 100% {
+    box-shadow:
+      2px 2px 0 var(--black),
+      0 0 8px rgba(118, 255, 143, 0.42),
+      0 0 16px rgba(118, 255, 143, 0.22);
+  }
+  50% {
+    box-shadow:
+      2px 2px 0 var(--black),
+      0 0 14px rgba(118, 255, 143, 0.68),
+      0 0 26px rgba(118, 255, 143, 0.36);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .market-card__status.is-live {
+    animation: none !important;
+  }
+}
+
+/* ---------- Live stats + wallet layout refinement ---------- */
+.market-card__status {
+  font-size: clamp(22px, 2.4vw, 34px) !important;
+  line-height: 0.92 !important;
+  padding: 7px 14px !important;
+  font-family: var(--shitfont) !important;
+  letter-spacing: 0.06em;
+}
+
+.market-card__status.is-live::before {
+  width: 10px;
+  height: 10px;
+  margin-right: 9px;
+}
+
+.blast-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-self: start;
+  width: 100%;
+}
+
+.blast-side .blast-card {
+  width: 100%;
+  max-width: none !important;
+}
+
+.wallet-panel-button {
+  width: 100%;
+  justify-content: center;
+  min-height: clamp(78px, 7.5vw, 96px);
+  padding: 18px 22px !important;
+  font-size: clamp(28px, 2.7vw, 42px) !important;
+  line-height: 0.95 !important;
+  transform: rotate(0.35deg) !important;
+  margin: 0 !important;
+}
+
+.wallet-panel-button:hover {
+  transform: rotate(0) scale(1.025) !important;
+}
+
+@media (min-width: 901px) {
+  .live-stack {
+    max-width: min(1060px, 100%) !important;
+    grid-template-columns: minmax(0, 1.32fr) minmax(330px, 0.78fr) !important;
+    gap: 18px !important;
+    align-items: start !important;
+  }
+
+  .button-grid {
+    max-width: min(1060px, 100%);
+  }
+}
+
+@media (max-width: 760px) {
+  .blast-side {
+    gap: 12px;
+  }
+
+  .wallet-panel-button {
+    min-height: 64px;
+    font-size: clamp(24px, 7vw, 32px) !important;
+  }
+}
