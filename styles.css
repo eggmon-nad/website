@@ -1803,3 +1803,164 @@ a {
 .faq-list h3 {
   line-height: 1.08;
 }
+
+/* ---------- R3tards optical size boost ---------- */
+.title {
+  font-size: clamp(138px, 19.5vw, 292px);
+  letter-spacing: 0.045em;
+}
+
+.subtitle {
+  font-size: clamp(38px, 5.2vw, 62px);
+  line-height: 1.02;
+}
+
+.click-prompt {
+  font-size: clamp(30px, 3.8vw, 42px);
+}
+
+.counter-block {
+  min-height: 68px;
+  padding: 14px 26px;
+}
+
+.counter-label,
+.counter-num {
+  font-size: clamp(30px, 3.2vw, 42px);
+  line-height: 0.95;
+}
+
+.ca-label,
+.copy-btn {
+  font-size: clamp(20px, 2.2vw, 26px);
+  line-height: 1;
+}
+
+.chunk-btn {
+  min-height: 72px;
+  padding: 18px 24px;
+  font-size: clamp(26px, 2.45vw, 36px);
+  line-height: 0.98;
+  letter-spacing: 0.045em;
+}
+
+.market-card__eyebrow,
+.market-card__status,
+.token-info-card__eyebrow {
+  font-size: clamp(17px, 1.45vw, 22px);
+  line-height: 0.95;
+  letter-spacing: 0.045em;
+}
+
+.blast-card__top span,
+.blast-card__top strong {
+  font-size: clamp(30px, 2.7vw, 42px);
+  line-height: 0.95;
+  letter-spacing: 0.045em;
+}
+
+.token-info-card h2 {
+  font-size: clamp(40px, 3.5vw, 56px);
+  line-height: 0.95;
+  letter-spacing: 0.045em;
+}
+
+.faq-list h3 {
+  font-size: clamp(26px, 2.25vw, 34px);
+  line-height: 0.98;
+  letter-spacing: 0.045em;
+}
+
+.modal-close {
+  font-size: 48px;
+  line-height: 0.8;
+}
+
+@media (min-width: 901px) {
+  .button-grid {
+    gap: 18px;
+  }
+
+  .chunk-btn {
+    min-height: 76px;
+  }
+}
+
+@media (max-width: 900px) {
+  .title {
+    font-size: clamp(112px, 22vw, 198px);
+  }
+
+  .subtitle {
+    font-size: clamp(31px, 6.5vw, 48px);
+  }
+
+  .click-prompt {
+    font-size: clamp(28px, 6.6vw, 38px);
+  }
+
+  .chunk-btn {
+    min-height: 68px;
+    padding: 17px 20px;
+    font-size: clamp(28px, 7vw, 38px);
+    line-height: 0.96;
+  }
+
+  .counter-block {
+    min-height: 64px;
+    padding: 12px 20px;
+  }
+
+  .counter-label,
+  .counter-num {
+    font-size: clamp(26px, 6.6vw, 36px);
+  }
+
+  .ca-label,
+  .copy-btn {
+    font-size: clamp(18px, 4.9vw, 24px);
+  }
+
+  .market-card__eyebrow,
+  .market-card__status,
+  .token-info-card__eyebrow {
+    font-size: clamp(16px, 4.2vw, 20px);
+  }
+
+  .blast-card__top span,
+  .blast-card__top strong {
+    font-size: clamp(26px, 6.5vw, 36px);
+  }
+
+  .token-info-card h2 {
+    font-size: clamp(34px, 8vw, 46px);
+  }
+
+  .faq-list h3 {
+    font-size: clamp(24px, 6vw, 32px);
+  }
+
+  .modal-close {
+    font-size: 44px;
+  }
+}
+
+@media (max-width: 420px) {
+  .title {
+    font-size: clamp(80px, 23vw, 104px);
+  }
+
+  .subtitle {
+    font-size: clamp(24px, 7vw, 31px);
+  }
+
+  .chunk-btn {
+    font-size: clamp(25px, 7.4vw, 32px);
+    min-height: 64px;
+  }
+
+  .counter-label,
+  .counter-num {
+    font-size: clamp(23px, 7vw, 31px);
+  }
+}
