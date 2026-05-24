@@ -1751,3 +1751,55 @@ a {
     font-family: var(--mono-font);
   }
 }
+
+/* ---------- R3tards font restoration for brand UI ---------- */
+.title,
+.subtitle,
+.click-prompt,
+.chunk-btn,
+.chunk-btn--primary,
+.chunk-btn--secondary,
+.chunk-btn--dex,
+.chunk-btn--share,
+.chunk-btn--gecko,
+.chunk-btn--info,
+.copy-btn,
+.ca-label,
+.counter-label,
+.counter-num,
+.market-card__eyebrow,
+.market-card__status,
+.blast-card__top span,
+.blast-card__top strong,
+.token-info-card__eyebrow,
+.token-info-card h2,
+.faq-list h3,
+.modal-close {
+  font-family: var(--shitfont) !important;
+}
+
+.chunk-btn,
+.copy-btn,
+.ca-label,
+.counter-label,
+.counter-num,
+.market-card__eyebrow,
+.market-card__status,
+.blast-card__top span,
+.blast-card__top strong,
+.token-info-card__eyebrow,
+.token-info-card h2,
+.faq-list h3,
+.modal-close {
+  letter-spacing: 0.035em;
+}
+
+.chunk-btn {
+  font-weight: 400 !important;
+  text-transform: uppercase;
+}
+
+.token-info-card h2,
+.faq-list h3 {
+  line-height: 1.08;
+}
