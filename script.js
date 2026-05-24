@@ -378,12 +378,12 @@
      ===================================================== */
   const SLIME_SRC = './sounds/slime-squish.mp3';
   const AUGH_SRC = './sounds/augh-meme.mp3';
-  const MAX_ACTIVE_SLIMES = 28;
+  const MAX_ACTIVE_SLIMES = 12;
   const activeSlimes = new Set();
 
   function createAudio(src, volume) {
     const audio = new Audio(src);
-    audio.preload = 'auto';
+    audio.preload = 'metadata';
     audio.volume = volume;
     return audio;
   }
@@ -430,8 +430,12 @@
     } catch (_) {}
   }
 
+  let audioWarmed = false;
+
   function warmAudio() {
-    // Browsers unlock audio on user gesture; preloading avoids first-play lag without starting sound.
+    if (audioWarmed) return;
+    audioWarmed = true;
+    // Browsers unlock audio on user gesture; metadata preloading avoids the worst first-play lag.
     createAudio(SLIME_SRC, 0.48).load();
     createAudio(AUGH_SRC, 0.42).load();
   }
@@ -515,6 +519,17 @@
     return data;
   }
 
+  let pendingClicks = 0;
+  let pendingOptimisticCount = 0;
+  let syncTimer = null;
+  let syncInFlight = false;
+
+  function buildCounterUrl(delta = 0) {
+    const url = new URL(COUNTER_API);
+    if (delta > 1) url.searchParams.set('delta', String(delta));
+    return url.toString();
+  }
+
   async function fetchGlobalCount() {
     const localCount = readLocalCount();
     if (localCount > 0) setCounter(localCount, { localFallback: true });
@@ -535,13 +550,27 @@
     }
   }
 
-  async function syncGlobalClick(optimisticCount) {
-    writeLocalCount(optimisticCount);
+  function scheduleGlobalSync() {
+    if (syncTimer !== null || syncInFlight) return;
+    syncTimer = window.setTimeout(() => {
+      syncTimer = null;
+      flushGlobalClicks();
+    }, 420);
+  }
+
+  async function flushGlobalClicks({ keepalive = false } = {}) {
+    if (syncInFlight || pendingClicks <= 0) return;
+
+    const delta = clamp(pendingClicks, 1, 25);
+    const optimisticCount = pendingOptimisticCount || count;
+    pendingClicks -= delta;
+    syncInFlight = true;
 
     try {
-      const response = await fetch(COUNTER_API, {
+      const response = await fetch(buildCounterUrl(delta), {
         method: 'POST',
         cache: 'no-store',
+        keepalive,
         headers: { 'Accept': 'application/json' },
       });
 
@@ -561,14 +590,32 @@
 
       if (!warnedCounterOffline) {
         warnedCounterOffline = true;
-        showToast('GLOBAL COUNTER NOT SYNCING — CHECK /api/count');
+        showToast('GLOBAL COUNTER NOT SYNCING — LOCAL MODE');
       }
 
       setCounter(optimisticCount, { localFallback: true });
+    } finally {
+      syncInFlight = false;
+      if (pendingClicks > 0) scheduleGlobalSync();
     }
   }
 
+  function syncGlobalClick(optimisticCount) {
+    writeLocalCount(optimisticCount);
+    pendingClicks += 1;
+    pendingOptimisticCount = optimisticCount;
+    scheduleGlobalSync();
+  }
+
   fetchGlobalCount();
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) flushGlobalClicks({ keepalive: true });
+  });
+
+  window.addEventListener('pagehide', () => {
+    flushGlobalClicks({ keepalive: true });
+  });
 
 
   function createEmoji(x, y) {
@@ -623,7 +670,7 @@
       strings.push(new LiquidString(headX + rand(-10, 10), headY + rand(4, 12)));
     }
 
-    const dropCount = reduced ? 8 : (isSmallScreen ? 24 : 34);
+    const dropCount = reduced ? 6 : (isSmallScreen ? 14 : 28);
     for (let i = 0; i < dropCount; i++) {
       drops.push(new LiquidDrop(
         headX + rand(-14, 14),
@@ -674,6 +721,75 @@
       e.preventDefault();
       handleInteract(e);
     }
+  });
+
+  /* =====================================================
+     TOKEN INFO MODAL
+     ===================================================== */
+  const tokenInfoOpen = document.getElementById('token-info-open');
+  const tokenInfoModal = document.getElementById('token-info-modal');
+  const tokenInfoDialog = document.getElementById('token-info');
+  const tokenInfoCloseTriggers = document.querySelectorAll('[data-token-info-close]');
+  let lastTokenInfoFocus = null;
+
+  function isTokenInfoOpen() {
+    return tokenInfoModal && tokenInfoModal.classList.contains('is-open');
+  }
+
+  function openTokenInfo() {
+    if (!tokenInfoModal || !tokenInfoDialog) return;
+    tokenInfoModal.hidden = false;
+    tokenInfoOpen?.setAttribute('aria-expanded', 'true');
+    lastTokenInfoFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    tokenInfoModal.classList.add('is-open');
+    tokenInfoModal.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('has-token-info-modal');
+    requestAnimationFrame(() => tokenInfoDialog.focus({ preventScroll: true }));
+  }
+
+  function closeTokenInfo() {
+    if (!tokenInfoModal || !tokenInfoDialog) return;
+    tokenInfoModal.classList.remove('is-open');
+    tokenInfoModal.setAttribute('aria-hidden', 'true');
+    tokenInfoOpen?.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('has-token-info-modal');
+    window.setTimeout(() => {
+      if (!tokenInfoModal.classList.contains('is-open')) tokenInfoModal.hidden = true;
+    }, 160);
+    if (lastTokenInfoFocus && typeof lastTokenInfoFocus.focus === 'function') {
+      lastTokenInfoFocus.focus({ preventScroll: true });
+    }
+  }
+
+  function trapTokenInfoFocus(e) {
+    if (!isTokenInfoOpen() || e.key !== 'Tab' || !tokenInfoDialog) return;
+    const focusable = Array.from(tokenInfoDialog.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+    if (!focusable.length) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  if (tokenInfoOpen) {
+    tokenInfoOpen.addEventListener('click', openTokenInfo);
+  }
+
+  tokenInfoCloseTriggers.forEach((trigger) => {
+    trigger.addEventListener('click', closeTokenInfo);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (!isTokenInfoOpen()) return;
+    if (e.key === 'Escape') closeTokenInfo();
+    trapTokenInfoFocus(e);
   });
 
   /* =====================================================

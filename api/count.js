@@ -82,6 +82,17 @@ function normalizeTotal(value) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
+function getPostDelta(req) {
+  try {
+    const requestUrl = new URL(req.url || '/', `https://${req.headers.host || 'localhost'}`);
+    const parsed = Number.parseInt(requestUrl.searchParams.get('delta') || '1', 10);
+    if (!Number.isFinite(parsed) || parsed < 1) return 1;
+    return Math.min(parsed, 25);
+  } catch (_) {
+    return 1;
+  }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Allow', 'GET, POST, OPTIONS');
@@ -113,11 +124,15 @@ module.exports = async function handler(req, res) {
 
   if (req.method === 'POST') {
     try {
-      const value = await redisCommand('INCR', COUNTER_KEY);
+      const delta = getPostDelta(req);
+      const value = delta === 1
+        ? await redisCommand('INCR', COUNTER_KEY)
+        : await redisCommand('INCRBY', COUNTER_KEY, delta);
       const total = normalizeTotal(value);
       sendJson(res, 200, {
         ok: true,
         total,
+        delta,
         key: COUNTER_KEY,
         storage: process.env.KV_REST_API_URL ? 'vercel-kv/upstash' : 'upstash',
       });

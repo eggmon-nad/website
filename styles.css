@@ -713,6 +713,68 @@ body::after {
   text-underline-offset: 4px;
 }
 
+
+/* ---------- Token info pop-up ---------- */
+body.has-token-info-modal {
+  overflow: hidden;
+}
+.token-info-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--gutter);
+}
+.token-info-modal.is-open {
+  display: flex;
+}
+.token-info-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(5px);
+}
+.token-info-card--modal {
+  position: relative;
+  z-index: 1;
+  margin-top: 0;
+  max-height: min(82vh, 720px);
+  overflow-y: auto;
+  transform: rotate(0.4deg);
+  box-shadow: 8px 8px 0 var(--black);
+}
+.token-info-card--modal:focus {
+  outline: none;
+}
+.token-info-card__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  background: var(--white);
+  color: var(--text);
+  border: 3px solid var(--black);
+  border-radius: 10px;
+  box-shadow: 3px 3px 0 var(--black);
+  font-size: 30px;
+  line-height: 1;
+  -webkit-text-stroke: 0;
+  touch-action: manipulation;
+}
+.token-info-card__close:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--black);
+}
+.token-info-card__close:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--black);
+}
+
 /* ---------- Disclaimer ---------- */
 .disclaimer {
   margin-top: 24px;
@@ -879,5 +941,285 @@ body::after {
   .mascot-wrap.is-jolting,
   .pop-emoji {
     animation: none !important;
+  }
+}
+
+/* =========================================================
+   Final UX audit optimization pass
+   - cleaner responsive grid
+   - lower mobile animation cost
+   - stronger focus states
+   - better modal behavior on touch devices
+   ========================================================= */
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-x: none;
+}
+
+button,
+a {
+  -webkit-touch-callout: none;
+}
+
+.stage {
+  min-height: auto;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  width: min(760px, 100%);
+  gap: 14px;
+  align-items: stretch;
+}
+
+.chunk-btn {
+  justify-content: center;
+  align-items: center;
+  min-height: 62px;
+  user-select: none;
+  line-height: 1.05;
+}
+
+.chunk-btn:focus-visible,
+.copy-btn:focus-visible,
+.ca-bar:focus-visible,
+.mascot-wrap:focus-visible,
+.token-info-card__close:focus-visible {
+  outline: 4px solid var(--mint);
+  outline-offset: 5px;
+}
+
+.counter-block,
+.chunk-btn,
+.copy-btn {
+  background: var(--white);
+  color: var(--text);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+.counter-block {
+  min-width: min(300px, 100%);
+  justify-content: center;
+}
+
+.counter-label,
+.counter-num {
+  color: var(--text);
+  -webkit-text-stroke: 0;
+  text-shadow: none;
+}
+
+.ca-bar {
+  box-shadow: 6px 6px 0 var(--black);
+}
+
+.ca-bar:hover {
+  box-shadow: 8px 8px 0 var(--black);
+}
+
+.ca-label {
+  background: var(--black);
+  color: var(--white);
+  -webkit-text-stroke: 0;
+}
+
+.toast {
+  min-height: 1.5em;
+}
+
+.token-info-modal[hidden] {
+  display: none !important;
+}
+
+.token-info-modal.is-open {
+  display: flex;
+  animation: modal-fade-in 140ms ease-out;
+}
+
+.token-info-modal__backdrop {
+  overscroll-behavior: contain;
+}
+
+.token-info-card--modal {
+  width: min(660px, calc(100vw - 28px));
+  max-height: min(82svh, 720px);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes modal-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@media (min-width: 901px) {
+  .stage {
+    max-width: min(960px, 100%);
+    padding-top: clamp(26px, 4vw, 46px);
+  }
+
+  .button-grid {
+    margin-top: 2px;
+  }
+
+  .chunk-btn:hover,
+  .copy-btn:hover {
+    will-change: transform;
+  }
+}
+
+@media (max-width: 700px) {
+  body::after {
+    animation: none;
+  }
+
+  .flying-eggs {
+    display: none;
+  }
+
+  .stage {
+    padding-top: 14px;
+    padding-bottom: 32px;
+    gap: 12px;
+  }
+
+  .title-block {
+    margin-top: 4px;
+  }
+
+  .click-prompt {
+    font-size: clamp(19px, 5.2vw, 24px);
+    gap: 8px;
+  }
+
+  .mascot-wrap {
+    width: min(272px, 68vw);
+  }
+
+  .mascot-wrap::before,
+  .mascot-glow {
+    filter: blur(5px);
+  }
+
+  .counter-block {
+    width: min(360px, 100%);
+    min-width: 0;
+    padding: 10px 16px;
+    font-size: clamp(20px, 5.7vw, 25px);
+  }
+
+  .button-grid {
+    grid-template-columns: 1fr;
+    width: min(380px, 100%);
+    gap: 10px;
+  }
+
+  .chunk-btn {
+    width: 100%;
+    min-height: 52px;
+    padding: 13px 16px;
+    font-size: clamp(19px, 5.5vw, 23px);
+    letter-spacing: 0.5px;
+    box-shadow: 5px 5px 0 var(--black);
+    transform: rotate(0.6deg);
+  }
+
+  .chunk-btn:hover {
+    transform: rotate(0) scale(1.02);
+    box-shadow: 6px 6px 0 var(--black);
+  }
+
+  .ca-bar {
+    width: min(380px, 100%);
+    box-shadow: 5px 5px 0 var(--black);
+  }
+
+  .ca-text {
+    font-size: 0.92em;
+  }
+
+  .lore-card {
+    width: min(380px, 100%);
+    font-size: clamp(16px, 4.6vw, 20px);
+    padding: 13px 15px;
+  }
+
+  .disclaimer {
+    margin-top: 8px;
+    width: min(380px, 100%);
+    font-size: 14px;
+  }
+
+  .token-info-modal {
+    align-items: flex-end;
+    padding: 10px;
+  }
+
+  .token-info-card--modal {
+    width: 100%;
+    max-height: min(86svh, 680px);
+    border-radius: 20px 20px 14px 14px;
+    padding: 16px;
+    transform: none;
+    box-shadow: 0 -5px 0 var(--black);
+  }
+
+  .token-info-card h2 {
+    padding-right: 42px;
+    font-size: clamp(22px, 6vw, 28px);
+  }
+
+  .token-info-card__close {
+    width: 44px;
+    height: 44px;
+    font-size: 34px;
+  }
+}
+
+@media (max-width: 380px) {
+  .title {
+    font-size: clamp(64px, 20vw, 82px);
+  }
+
+  .subtitle {
+    font-size: clamp(19px, 5.6vw, 23px);
+  }
+
+  .mascot-wrap {
+    width: min(238px, 66vw);
+  }
+
+  .chunk-btn {
+    font-size: 19px;
+  }
+
+  .ca-bar {
+    gap: 5px;
+  }
+
+  .copy-btn {
+    padding-inline: 8px;
+  }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .button-grid {
+    grid-template-columns: repeat(2, minmax(180px, 1fr));
+    width: min(560px, 100%);
+  }
+
+  .token-info-modal {
+    align-items: center;
+  }
+
+  .token-info-card--modal {
+    max-height: calc(100svh - 18px);
   }
 }

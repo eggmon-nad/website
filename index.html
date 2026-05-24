@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#694b87" />
+  <meta name="color-scheme" content="light" />
   <meta name="description" content="Official EGGMON ($EGG) site on Monad with contract address, chart links, trading links, and verified token information." />
 
   <!-- Open Graph / Twitter card -->
@@ -25,7 +26,6 @@
   <link rel="apple-touch-icon" href="./favicon.png" />
   <link rel="preload" href="./R3tards-Regular.otf" as="font" type="font/otf" crossorigin />
   <link rel="preload" href="./eggmon.webp" as="image" type="image/webp" fetchpriority="high" />
-  <link rel="preload" href="./sounds/slime-squish.mp3" as="audio" type="audio/mpeg" />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -113,24 +113,30 @@
          target="_blank" rel="noopener noreferrer">
         𝕏 TWITTER
       </a>
-      <a class="chunk-btn chunk-btn--info" href="#token-info">
+      <button type="button" class="chunk-btn chunk-btn--info" id="token-info-open" aria-haspopup="dialog" aria-controls="token-info-modal" aria-expanded="false">
         📄 TOKEN INFO
-      </a>
-      <a class="chunk-btn chunk-btn--share"
-         href="https://twitter.com/intent/tweet?text=I%20found%20the%20only%20egg%20on%20Monad%20%F0%9F%A5%9A%20%24EGG&url=https%3A%2F%2Feggmon.fun%2F"
-         target="_blank" rel="noopener noreferrer">
-        SHARE ON 𝕏
-      </a>
+      </button>
     </nav>
 
     <section class="lore-card" aria-label="Eggmon lore">
-      <p>Born to cum all over the timeline. My balls are tight. Help me release the load :) </p>
+      <p>Born to cum all over the timeline. Help me release the load :)</p>
     </section>
 
-    <section class="token-info-card" id="token-info" aria-label="Official EGGMON token information">
+
+    <footer class="disclaimer">
+      <p>$EGG is a community-run memecoin with no intrinsic value and no expectation of financial return.</p>
+      <p class="disclaimer__tiny">do your own research &nbsp;·&nbsp; probably nothing</p>
+    </footer>
+  </main>
+
+
+  <div class="token-info-modal" id="token-info-modal" aria-hidden="true" hidden>
+    <div class="token-info-modal__backdrop" data-token-info-close aria-hidden="true"></div>
+    <section class="token-info-card token-info-card--modal" id="token-info" role="dialog" aria-modal="true" aria-labelledby="token-info-title" aria-describedby="token-info-description" tabindex="-1">
+      <button type="button" class="token-info-card__close" data-token-info-close aria-label="Close token info">×</button>
       <div class="token-info-card__eyebrow">Official $EGG data</div>
-      <h2>Token info, but still egg coded.</h2>
-      <p class="token-info-card__intro">EGGMON is a Monad-native community memecoin. This is the official source for the contract, links, and chart references. No promises, no roadmap cosplay.</p>
+      <h2 id="token-info-title">Token info, but still egg coded.</h2>
+      <p class="token-info-card__intro" id="token-info-description">EGGMON is a Monad-native community memecoin. This is the official source for the contract, links, and chart references. No promises, no roadmap cosplay.</p>
       <dl>
         <div><dt>Name</dt><dd>EGGMON</dd></div>
         <div><dt>Ticker</dt><dd>$EGG</dd></div>
@@ -143,12 +149,7 @@
       </dl>
       <p class="token-info-card__note">All trading and supply details should be verified on-chain and through active Monad pools. $EGG has no intrinsic value and no expectation of financial return.</p>
     </section>
-
-    <footer class="disclaimer">
-      <p>$EGG is a community-run memecoin with no intrinsic value and no expectation of financial return.</p>
-      <p class="disclaimer__tiny">do your own research &nbsp;·&nbsp; probably nothing</p>
-    </footer>
-  </main>
+  </div>
 
   <!-- Bottom scrolling banner -->
   <div class="marquee marquee--bottom" aria-hidden="true">
