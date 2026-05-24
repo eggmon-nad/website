@@ -2097,3 +2097,115 @@ a {
     letter-spacing: 0.02em !important;
   }
 }
+
+/* ---------- Compact Cum Blast Status card ---------- */
+.live-stack {
+  align-items: start !important;
+}
+
+.blast-card {
+  align-self: start !important;
+  justify-content: flex-start !important;
+  min-height: 0 !important;
+  gap: 10px;
+  padding: clamp(14px, 1.8vw, 18px) !important;
+  overflow: hidden;
+  position: relative;
+}
+
+.blast-card::after {
+  content: "";
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  right: -42px;
+  bottom: -52px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(238,147,227,0.28), transparent 68%);
+  pointer-events: none;
+}
+
+.blast-card__top {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+  margin-bottom: 0 !important;
+  position: relative;
+  z-index: 1;
+}
+
+.blast-card__top span {
+  display: block;
+  text-align: left;
+  line-height: 0.95 !important;
+}
+
+.blast-card__top strong {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 46px;
+  padding: 8px 12px;
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  background: var(--jizz);
+  color: var(--magenta) !important;
+  box-shadow: 3px 3px 0 var(--black);
+  text-align: center !important;
+  line-height: 0.95 !important;
+  overflow-wrap: anywhere;
+}
+
+.blast-meter {
+  height: clamp(24px, 2vw, 30px) !important;
+  margin: 0 !important;
+  position: relative;
+  z-index: 1;
+}
+
+.blast-card__detail {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 0 !important;
+  padding: 7px 10px;
+  border: 2px solid var(--black);
+  border-radius: 999px;
+  background: rgba(255, 253, 240, 0.86);
+  color: var(--text);
+  opacity: 1 !important;
+  line-height: 1.05 !important;
+  position: relative;
+  z-index: 1;
+}
+
+@media (min-width: 901px) {
+  .blast-card {
+    max-width: 390px;
+  }
+
+  .blast-card__top strong {
+    min-height: 50px;
+  }
+}
+
+@media (max-width: 760px) {
+  .blast-card {
+    width: 100%;
+    max-width: none;
+  }
+
+  .blast-card__top strong {
+    max-width: 100% !important;
+  }
+}
+
+.market-card__eyebrow {
+  font-size: clamp(22px, 2.4vw, 34px) !important;
+  line-height: 0.92 !important;
+  padding: 7px 14px !important;
+}
