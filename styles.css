@@ -3152,3 +3152,196 @@ a {
     animation-duration: 24s !important;
   }
 }
+
+/* ---------- Desktop floating Eggmon field spacing ---------- */
+.flying-egg.e7,
+.flying-egg.e8,
+.flying-egg.e9,
+.flying-egg.e10,
+.flying-egg.e11,
+.flying-egg.e12 {
+  display: none !important;
+}
+
+@media (min-width: 901px) {
+  .flying-eggs {
+    z-index: 5 !important;
+  }
+
+  .flying-egg {
+    width: clamp(78px, 6.6vw, 138px) !important;
+    opacity: 0.48 !important;
+  }
+
+  .flying-egg.e1,
+  .flying-egg.e2,
+  .flying-egg.e3,
+  .flying-egg.e4,
+  .flying-egg.e5,
+  .flying-egg.e6,
+  .flying-egg.e7,
+  .flying-egg.e8,
+  .flying-egg.e9,
+  .flying-egg.e10,
+  .flying-egg.e11,
+  .flying-egg.e12 {
+    display: block !important;
+  }
+
+  .flying-egg.e1 {
+    top: 8vh !important;
+    left: 3vw !important;
+    right: auto !important;
+    bottom: auto !important;
+    --spin-time: 22s;
+    animation: egg-field-drift-a 31s ease-in-out infinite !important;
+  }
+
+  .flying-egg.e2 {
+    top: 8vh !important;
+    right: 3vw !important;
+    left: auto !important;
+    bottom: auto !important;
+    --spin-time: 26s;
+    animation: egg-field-drift-b 34s ease-in-out -7s infinite !important;
+  }
+
+  .flying-egg.e3 {
+    top: 29vh !important;
+    left: 9vw !important;
+    right: auto !important;
+    bottom: auto !important;
+    --spin-time: 20s;
+    animation: egg-field-drift-c 36s ease-in-out -11s infinite !important;
+  }
+
+  .flying-egg.e4 {
+    top: 29vh !important;
+    right: 9vw !important;
+    left: auto !important;
+    bottom: auto !important;
+    --spin-time: 30s;
+    animation: egg-field-drift-d 39s ease-in-out -15s infinite !important;
+  }
+
+  .flying-egg.e5 {
+    top: 56vh !important;
+    left: 4vw !important;
+    right: auto !important;
+    bottom: auto !important;
+    --spin-time: 24s;
+    animation: egg-field-drift-e 37s ease-in-out -4s infinite !important;
+  }
+
+  .flying-egg.e6 {
+    top: 56vh !important;
+    right: 4vw !important;
+    left: auto !important;
+    bottom: auto !important;
+    --spin-time: 32s;
+    animation: egg-field-drift-f 41s ease-in-out -18s infinite !important;
+  }
+
+  .flying-egg.e7 {
+    bottom: 8vh !important;
+    left: 17vw !important;
+    right: auto !important;
+    top: auto !important;
+    --spin-time: 28s;
+    animation: egg-field-drift-b 35s ease-in-out -21s infinite !important;
+  }
+
+  .flying-egg.e8 {
+    bottom: 8vh !important;
+    right: 17vw !important;
+    left: auto !important;
+    top: auto !important;
+    --spin-time: 23s;
+    animation: egg-field-drift-a 33s ease-in-out -13s infinite !important;
+  }
+
+  .flying-egg.e9 {
+    top: 15vh !important;
+    left: 30vw !important;
+    right: auto !important;
+    bottom: auto !important;
+    --spin-time: 27s;
+    animation: egg-field-drift-e 38s ease-in-out -9s infinite !important;
+  }
+
+  .flying-egg.e10 {
+    top: 15vh !important;
+    right: 30vw !important;
+    left: auto !important;
+    bottom: auto !important;
+    --spin-time: 31s;
+    animation: egg-field-drift-f 40s ease-in-out -17s infinite !important;
+  }
+
+  .flying-egg.e11 {
+    bottom: 12vh !important;
+    left: 33vw !important;
+    right: auto !important;
+    top: auto !important;
+    --spin-time: 21s;
+    animation: egg-field-drift-c 36s ease-in-out -25s infinite !important;
+  }
+
+  .flying-egg.e12 {
+    bottom: 12vh !important;
+    right: 33vw !important;
+    left: auto !important;
+    top: auto !important;
+    --spin-time: 29s;
+    animation: egg-field-drift-d 42s ease-in-out -29s infinite !important;
+  }
+}
+
+@media (min-width: 1440px) {
+  .flying-egg {
+    width: clamp(88px, 5.8vw, 150px) !important;
+    opacity: 0.52 !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .flying-egg.e7,
+  .flying-egg.e8,
+  .flying-egg.e9,
+  .flying-egg.e10,
+  .flying-egg.e11,
+  .flying-egg.e12 {
+    display: none !important;
+  }
+}
+
+@keyframes egg-field-drift-a {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-2deg) scale(1); }
+  50% { transform: translate3d(2.2vw, 2.6vh, 0) rotate(5deg) scale(1.04); }
+}
+
+@keyframes egg-field-drift-b {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(3deg) scale(0.98); }
+  50% { transform: translate3d(-2.2vw, 2.8vh, 0) rotate(-5deg) scale(1.05); }
+}
+
+@keyframes egg-field-drift-c {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(2deg) scale(1.01); }
+  50% { transform: translate3d(2.6vw, -2.4vh, 0) rotate(-4deg) scale(0.96); }
+}
+
+@keyframes egg-field-drift-d {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-3deg) scale(1); }
+  50% { transform: translate3d(-2.6vw, -2.4vh, 0) rotate(4deg) scale(0.97); }
+}
+
+@keyframes egg-field-drift-e {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-1deg) scale(0.96); }
+  50% { transform: translate3d(1.8vw, -3vh, 0) rotate(6deg) scale(1.04); }
+}
+
+@keyframes egg-field-drift-f {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(1deg) scale(0.96); }
+  50% { transform: translate3d(-1.8vw, -3vh, 0) rotate(-6deg) scale(1.04); }
+}
+
