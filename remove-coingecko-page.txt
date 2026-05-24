@@ -1,5 +1,0 @@
-Delete this old file from your repo if it exists:
-
-coingecko.html
-
-This patch intentionally keeps all official token info on the homepage instead of using a CoinGecko-specific page.
