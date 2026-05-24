@@ -2942,3 +2942,159 @@ a {
   }
 }
 
+
+/* ---------- Desktop floating Eggmons fix ---------- */
+.flying-eggs {
+  display: block !important;
+  visibility: visible !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+  z-index: 5 !important;
+  contain: layout paint !important;
+  opacity: 1 !important;
+}
+
+.flying-egg {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 0.58 !important;
+  width: clamp(92px, 10.5vw, 180px) !important;
+  position: absolute !important;
+  transform: translate3d(0, 0, 0);
+}
+
+.flying-egg::before {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-image: url('./eggmon.png') !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: contain !important;
+  animation: egg-spin-soft var(--spin-time, 20s) linear infinite !important;
+}
+
+@supports (background-image: url('./eggmon.webp')) {
+  .flying-egg::before {
+    background-image: url('./eggmon.webp') !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .flying-eggs {
+    display: block !important;
+    opacity: 1 !important;
+  }
+
+  .flying-egg {
+    display: block !important;
+    opacity: 0.62 !important;
+    width: clamp(120px, 10.5vw, 190px) !important;
+  }
+
+  .flying-egg.e1 {
+    top: 12vh !important;
+    left: clamp(18px, 2.6vw, 52px) !important;
+    --spin-time: 19s;
+    animation: desktop-egg-drift-1 24s ease-in-out infinite !important;
+  }
+
+  .flying-egg.e2 {
+    top: 14vh !important;
+    right: clamp(18px, 2.6vw, 52px) !important;
+    --spin-time: 23s;
+    animation: desktop-egg-drift-2 28s ease-in-out -5s infinite !important;
+  }
+
+  .flying-egg.e3 {
+    bottom: 11vh !important;
+    left: clamp(20px, 3.4vw, 72px) !important;
+    --spin-time: 17s;
+    animation: desktop-egg-drift-3 25s ease-in-out -9s infinite !important;
+  }
+
+  .flying-egg.e4 {
+    bottom: 12vh !important;
+    right: clamp(20px, 3.4vw, 72px) !important;
+    --spin-time: 27s;
+    animation: desktop-egg-drift-4 31s ease-in-out -12s infinite !important;
+  }
+
+  .flying-egg.e5 {
+    top: 50vh !important;
+    left: clamp(90px, 10vw, 190px) !important;
+    --spin-time: 21s;
+    animation: desktop-egg-drift-5 30s ease-in-out -3s infinite !important;
+  }
+
+  .flying-egg.e6 {
+    top: 49vh !important;
+    right: clamp(90px, 10vw, 190px) !important;
+    --spin-time: 29s;
+    animation: desktop-egg-drift-6 34s ease-in-out -15s infinite !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .flying-eggs {
+    z-index: 5 !important;
+  }
+
+  .flying-egg {
+    width: clamp(82px, 21vw, 112px) !important;
+    opacity: 0.5 !important;
+  }
+}
+
+@media (max-width: 700px) {
+  .flying-eggs {
+    display: block !important;
+  }
+
+  .flying-egg.e5,
+  .flying-egg.e6 {
+    display: none !important;
+  }
+}
+
+@keyframes desktop-egg-drift-1 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-2deg) scale(1); }
+  35% { transform: translate3d(4.5vw, 5vh, 0) rotate(5deg) scale(1.06); }
+  70% { transform: translate3d(2vw, 15vh, 0) rotate(-4deg) scale(0.96); }
+}
+
+@keyframes desktop-egg-drift-2 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(3deg) scale(1.02); }
+  30% { transform: translate3d(-4.5vw, 6vh, 0) rotate(-5deg) scale(0.96); }
+  68% { transform: translate3d(-2vw, 17vh, 0) rotate(4deg) scale(1.08); }
+}
+
+@keyframes desktop-egg-drift-3 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(2deg) scale(0.98); }
+  40% { transform: translate3d(5vw, -7vh, 0) rotate(-5deg) scale(1.08); }
+  75% { transform: translate3d(2vw, -19vh, 0) rotate(5deg) scale(0.95); }
+}
+
+@keyframes desktop-egg-drift-4 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-3deg) scale(1); }
+  38% { transform: translate3d(-5vw, -7vh, 0) rotate(4deg) scale(1.06); }
+  72% { transform: translate3d(-2vw, -18vh, 0) rotate(-5deg) scale(0.97); }
+}
+
+@keyframes desktop-egg-drift-5 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(-2deg) scale(0.94); }
+  45% { transform: translate3d(4vw, -10vh, 0) rotate(6deg) scale(1.04); }
+  80% { transform: translate3d(7vw, 5vh, 0) rotate(-5deg) scale(1.08); }
+}
+
+@keyframes desktop-egg-drift-6 {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(2deg) scale(0.94); }
+  42% { transform: translate3d(-4vw, -10vh, 0) rotate(-6deg) scale(1.04); }
+  78% { transform: translate3d(-7vw, 5vh, 0) rotate(5deg) scale(1.08); }
+}
