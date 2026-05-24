@@ -2319,3 +2319,35 @@ a {
     font-size: clamp(24px, 7vw, 32px) !important;
   }
 }
+
+/* ---------- Compact CA bar ---------- */
+.ca-bar {
+  width: fit-content !important;
+  max-width: min(690px, calc(100% - 24px)) !important;
+  align-self: center;
+  padding: 12px 14px !important;
+  gap: 12px !important;
+}
+
+.ca-text {
+  flex: 0 1 auto !important;
+  max-width: min(48ch, 58vw) !important;
+}
+
+@media (min-width: 901px) {
+  .ca-bar {
+    max-width: min(700px, 100%) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .ca-bar {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .ca-text {
+    flex: 1 1 0 !important;
+    max-width: none !important;
+  }
+}
