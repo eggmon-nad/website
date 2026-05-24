@@ -2473,3 +2473,77 @@ a {
     padding: 8px 14px !important;
   }
 }
+
+
+/* ---------- Final PRICE ACTION card cleanup ---------- */
+.market-card {
+  padding: 20px 20px 18px !important;
+}
+
+.market-card__top {
+  align-items: flex-start !important;
+  margin-bottom: 12px !important;
+  gap: 16px !important;
+}
+
+.market-card__eyebrow {
+  font-size: clamp(30px, 2.45vw, 38px) !important;
+  line-height: 0.86 !important;
+  letter-spacing: 0.04em !important;
+}
+
+.market-card__status {
+  font-family: var(--shitfont) !important;
+  font-size: clamp(18px, 1.4vw, 22px) !important;
+  line-height: 0.95 !important;
+  padding: 8px 14px !important;
+  border-radius: 999px !important;
+  border: 3px solid var(--black) !important;
+  min-width: 92px !important;
+  justify-content: center !important;
+}
+
+.market-card__status.is-live {
+  background: #7fffd0 !important;
+  color: #0a6b45 !important;
+  box-shadow:
+    2px 2px 0 var(--black),
+    0 0 10px rgba(127, 255, 208, 0.28),
+    0 0 18px rgba(127, 255, 208, 0.16) !important;
+}
+
+.market-card__price {
+  font-size: clamp(36px, 4.05vw, 56px) !important;
+  line-height: 0.92 !important;
+  margin-bottom: 16px !important;
+}
+
+.market-card__source {
+  margin-top: 12px !important;
+}
+
+@media (max-width: 760px) {
+  .market-card {
+    padding: 16px !important;
+  }
+
+  .market-card__top {
+    margin-bottom: 10px !important;
+    gap: 12px !important;
+  }
+
+  .market-card__eyebrow {
+    font-size: clamp(26px, 7.2vw, 34px) !important;
+  }
+
+  .market-card__status {
+    font-size: clamp(16px, 4.8vw, 20px) !important;
+    padding: 7px 12px !important;
+    min-width: 84px !important;
+  }
+
+  .market-card__price {
+    font-size: clamp(32px, 10vw, 46px) !important;
+    margin-bottom: 14px !important;
+  }
+}
