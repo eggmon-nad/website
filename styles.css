@@ -2370,3 +2370,38 @@ a {
 .blast-card::after {
   background: radial-gradient(circle, rgba(255, 43, 31, 0.18), rgba(255, 179, 71, 0.12) 42%, transparent 70%) !important;
 }
+
+/* ---------- Clean oversized card headings ---------- */
+.market-card__eyebrow,
+.blast-card__top span {
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  color: var(--text) !important;
+  font-family: var(--shitfont) !important;
+  font-size: clamp(30px, 3.2vw, 46px) !important;
+  line-height: 0.82 !important;
+  letter-spacing: 0.055em !important;
+  -webkit-text-stroke: 0 !important;
+  paint-order: normal !important;
+  text-shadow: none !important;
+}
+
+.market-card__status {
+  font-size: clamp(30px, 3.2vw, 46px) !important;
+  line-height: 0.82 !important;
+}
+
+.blast-card__top {
+  margin-bottom: 14px !important;
+}
+
+@media (max-width: 760px) {
+  .market-card__eyebrow,
+  .market-card__status,
+  .blast-card__top span {
+    font-size: clamp(27px, 8vw, 38px) !important;
+  }
+}
