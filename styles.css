@@ -2351,3 +2351,22 @@ a {
     max-width: none !important;
   }
 }
+
+/* ---------- Cum Blast Status hot gradient ---------- */
+.blast-meter__fill {
+  background: linear-gradient(
+    90deg,
+    #8ffcff 0%,
+    #8ffcff 18%,
+    #ffb347 58%,
+    #ff2b1f 100%
+  ) !important;
+  box-shadow:
+    inset 0 0 10px rgba(255, 255, 255, 0.38),
+    0 0 12px rgba(255, 179, 71, 0.32),
+    0 0 18px rgba(255, 43, 31, 0.22);
+}
+
+.blast-card::after {
+  background: radial-gradient(circle, rgba(255, 43, 31, 0.18), rgba(255, 179, 71, 0.12) 42%, transparent 70%) !important;
+}
