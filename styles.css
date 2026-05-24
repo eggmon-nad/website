@@ -1424,3 +1424,330 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   Desktop readability pass
+   Keeps the meme identity, but makes functional UI easier to scan.
+   ========================================================= */
+:root {
+  --ui-font: ui-rounded, "Arial Rounded MT Bold", Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --mono-font: "SFMono-Regular", Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+.ca-bar,
+.copy-btn,
+.counter-block,
+.button-grid,
+.chunk-btn,
+.market-card,
+.blast-card,
+.token-info-card,
+.faq-list,
+.disclaimer,
+.toast {
+  -webkit-text-stroke: 0 !important;
+  text-shadow: none !important;
+  paint-order: normal !important;
+}
+
+.market-card,
+.blast-card,
+.token-info-card,
+.faq-list,
+.disclaimer,
+.toast,
+.ca-label,
+.copy-btn {
+  font-family: var(--ui-font);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.ca-text {
+  font-family: var(--mono-font);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.chunk-btn {
+  font-family: var(--ui-font);
+  font-weight: 950;
+  text-transform: uppercase;
+  letter-spacing: -0.015em;
+}
+
+.market-card__grid span,
+.blast-card__detail,
+.token-info-card dt,
+.token-info-card__intro,
+.token-info-card__note,
+.faq-list p,
+.disclaimer {
+  font-weight: 700;
+}
+
+.token-info-card dd,
+.market-card__grid strong,
+.market-card__price,
+.blast-card__top strong {
+  font-weight: 950;
+}
+
+@media (min-width: 901px) {
+  .stage {
+    max-width: min(1120px, 100%);
+    gap: 18px;
+    padding-inline: clamp(24px, 4vw, 56px);
+    padding-bottom: 72px;
+  }
+
+  .title-block {
+    max-width: 1040px;
+    margin-top: 4px;
+  }
+
+  .title {
+    font-size: clamp(132px, 15vw, 220px);
+    letter-spacing: 0.028em;
+  }
+
+  .subtitle {
+    font-size: clamp(32px, 3.4vw, 48px);
+    max-width: 900px;
+    margin-inline: auto;
+  }
+
+  .mascot-wrap {
+    width: min(330px, 34vw);
+  }
+
+  .counter-block {
+    min-width: 340px;
+    padding: 14px 24px;
+    font-family: var(--ui-font);
+    font-size: clamp(22px, 2.3vw, 30px);
+    letter-spacing: -0.015em;
+    border-radius: 18px;
+  }
+
+  .ca-bar {
+    max-width: 760px;
+    padding: 12px 14px;
+    font-family: var(--ui-font);
+    font-size: 16px;
+    border-radius: 16px;
+  }
+
+  .ca-label,
+  .copy-btn {
+    font-size: 15px;
+    line-height: 1;
+  }
+
+  .ca-text {
+    font-size: 15px;
+  }
+
+  .live-stack {
+    max-width: 1040px;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.85fr);
+    gap: 18px;
+  }
+
+  .market-card,
+  .blast-card {
+    padding: 20px;
+    border-radius: 22px;
+    box-shadow: 8px 8px 0 var(--black);
+  }
+
+  .market-card__top,
+  .blast-card__top {
+    margin-bottom: 14px;
+  }
+
+  .market-card__eyebrow,
+  .market-card__status {
+    font-size: 13px;
+    padding: 6px 11px;
+  }
+
+  .market-card__price {
+    font-family: var(--mono-font);
+    font-size: clamp(30px, 3.4vw, 42px);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    margin-bottom: 16px;
+  }
+
+  .market-card__grid {
+    gap: 10px;
+  }
+
+  .market-card__grid div {
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .market-card__grid span,
+  .blast-card__detail,
+  .market-card__source {
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  .market-card__grid strong {
+    font-family: var(--mono-font);
+    font-size: clamp(18px, 1.6vw, 22px);
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+  }
+
+  .blast-card__top span,
+  .blast-card__top strong {
+    font-size: clamp(22px, 2vw, 28px);
+    line-height: 1.08;
+  }
+
+  .blast-meter {
+    height: 24px;
+  }
+
+  .button-grid {
+    width: min(1040px, 100%);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .chunk-btn {
+    min-height: 60px;
+    padding: 16px 18px;
+    font-size: clamp(17px, 1.55vw, 22px);
+    line-height: 1.1;
+    border-radius: 16px;
+    box-shadow: 6px 6px 0 var(--black);
+  }
+
+  .chunk-btn:hover {
+    transform: translate(-2px, -2px) rotate(0deg);
+    box-shadow: 9px 9px 0 var(--black);
+  }
+
+  .lore-card {
+    max-width: 760px;
+    padding: 18px 24px;
+    font-family: var(--ui-font);
+    font-size: clamp(18px, 1.65vw, 23px);
+    font-weight: 900;
+    line-height: 1.35;
+    -webkit-text-stroke: 0;
+    text-shadow: none;
+  }
+
+  .disclaimer {
+    max-width: 740px;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .token-info-card--modal {
+    width: min(760px, calc(100vw - 48px));
+    padding: 24px 26px;
+    transform: none;
+  }
+
+  .token-info-card__eyebrow {
+    font-family: var(--ui-font);
+    font-size: 13px;
+    font-weight: 950;
+  }
+
+  .token-info-card h2 {
+    font-family: var(--ui-font);
+    font-size: clamp(28px, 2.6vw, 38px);
+    line-height: 1.05;
+    color: var(--black);
+  }
+
+  .token-info-card__intro,
+  .token-info-card__note {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .token-info-card dl {
+    gap: 10px 14px;
+  }
+
+  .token-info-card dl > div,
+  .faq-list article {
+    background: #fffdf0;
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+
+  .token-info-card dt {
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .token-info-card dd {
+    margin-top: 2px;
+    font-size: 16px;
+    line-height: 1.28;
+  }
+
+  .faq-list {
+    gap: 12px;
+  }
+
+  .faq-list h3 {
+    font-family: var(--ui-font);
+    color: var(--black);
+    font-size: 18px;
+    line-height: 1.15;
+  }
+
+  .faq-list p {
+    font-size: 16px;
+    line-height: 1.48;
+  }
+}
+
+@media (min-width: 1200px) {
+  .stage {
+    max-width: 1180px;
+  }
+
+  .button-grid,
+  .live-stack {
+    max-width: 1080px;
+  }
+}
+
+@media (max-width: 900px) {
+  .chunk-btn,
+  .market-card,
+  .blast-card,
+  .token-info-card,
+  .faq-list,
+  .disclaimer,
+  .counter-block,
+  .copy-btn,
+  .ca-label {
+    font-family: var(--ui-font);
+  }
+
+  .chunk-btn {
+    font-weight: 950;
+    letter-spacing: -0.015em;
+    text-transform: uppercase;
+  }
+
+  .market-card__price,
+  .market-card__grid strong,
+  .ca-text {
+    font-family: var(--mono-font);
+  }
+}
