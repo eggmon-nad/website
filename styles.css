@@ -3425,3 +3425,158 @@ a {
     animation-duration: 58s !important;
   }
 }
+
+
+/* ---------- Cum Blast 333 release mode ---------- */
+.hyper-blast {
+  position: fixed;
+  inset: -18vh -12vw;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+  contain: layout paint size;
+}
+
+.hyper-blast__wash,
+.hyper-blast__foam {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.hyper-blast__wash {
+  background:
+    radial-gradient(ellipse at 50% 18%, rgba(255,255,255,0.98) 0%, rgba(255,253,240,0.94) 18%, transparent 42%),
+    radial-gradient(ellipse at 18% 32%, rgba(255,253,240,0.98) 0%, rgba(255,253,240,0.86) 14%, transparent 38%),
+    radial-gradient(ellipse at 82% 28%, rgba(255,253,240,0.98) 0%, rgba(255,253,240,0.86) 13%, transparent 36%),
+    linear-gradient(180deg, rgba(255,253,240,0.98) 0%, rgba(255,253,240,0.92) 42%, rgba(255,253,240,0.68) 72%, rgba(255,253,240,0) 100%);
+  filter: drop-shadow(0 0 24px rgba(255,253,240,0.78));
+  transform: translateY(-115%) scale(1.04);
+  animation: hyper-wash-down 2.9s cubic-bezier(.12,.78,.14,1) forwards;
+}
+
+.hyper-blast__foam {
+  background:
+    radial-gradient(circle at 8% 22%, rgba(255,255,255,0.98) 0 7%, transparent 8%),
+    radial-gradient(circle at 22% 58%, rgba(255,253,240,0.98) 0 10%, transparent 11%),
+    radial-gradient(circle at 38% 34%, rgba(255,255,255,0.98) 0 8%, transparent 9%),
+    radial-gradient(circle at 52% 74%, rgba(255,253,240,0.98) 0 12%, transparent 13%),
+    radial-gradient(circle at 70% 42%, rgba(255,255,255,0.98) 0 9%, transparent 10%),
+    radial-gradient(circle at 88% 68%, rgba(255,253,240,0.98) 0 11%, transparent 12%);
+  opacity: 0;
+  animation: hyper-foam-pop 2.8s ease-out forwards;
+}
+
+.hyper-blast__blob {
+  position: absolute;
+  top: -26vh;
+  left: calc(var(--x) * 1%);
+  width: var(--s);
+  height: calc(var(--s) * 1.28);
+  border-radius: 58% 52% 64% 48%;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255,255,255,0.98) 0 12%, transparent 13%),
+    #fffdf0;
+  border: 2px solid rgba(0,0,0,0.08);
+  filter:
+    drop-shadow(0 0 14px rgba(255,253,240,0.72))
+    drop-shadow(4px 5px 0 rgba(0,0,0,0.16));
+  transform: translate3d(0, -34vh, 0) rotate(var(--r)) scale(0.7);
+  animation: hyper-blob-fall var(--d) cubic-bezier(.13,.78,.16,1) var(--delay) forwards;
+  will-change: transform, opacity;
+}
+
+.is-hyper-blasting .stage,
+.is-hyper-blasting .marquee,
+.is-hyper-blasting .flying-eggs {
+  animation: hyper-site-shake 720ms cubic-bezier(.34,.02,.2,1.2) both;
+}
+
+.blast-card__top strong {
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+@keyframes hyper-wash-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-115%) scale(1.04);
+  }
+  18% {
+    opacity: 1;
+  }
+  48% {
+    transform: translateY(-4%) scale(1.05);
+  }
+  76% {
+    opacity: 0.96;
+    transform: translateY(0) scale(1.02);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(8%) scale(1.08);
+  }
+}
+
+@keyframes hyper-foam-pop {
+  0%, 18% {
+    opacity: 0;
+    transform: scale(0.78) rotate(-2deg);
+  }
+  44% {
+    opacity: 1;
+    transform: scale(1.04) rotate(1deg);
+  }
+  82% {
+    opacity: 0.82;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18) rotate(2deg);
+  }
+}
+
+@keyframes hyper-blob-fall {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -34vh, 0) rotate(var(--r)) scale(0.62);
+  }
+  18% {
+    opacity: 1;
+  }
+  52% {
+    transform: translate3d(0, 68vh, 0) rotate(calc(var(--r) * -0.65)) scale(1.18);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(0, 138vh, 0) rotate(calc(var(--r) * 1.8)) scale(0.92);
+  }
+}
+
+@keyframes hyper-site-shake {
+  0%, 100% { transform: translate3d(0,0,0) rotate(0deg); }
+  12% { transform: translate3d(-6px,5px,0) rotate(-0.35deg); }
+  25% { transform: translate3d(7px,-4px,0) rotate(0.35deg); }
+  42% { transform: translate3d(-5px,-3px,0) rotate(-0.25deg); }
+  62% { transform: translate3d(4px,3px,0) rotate(0.2deg); }
+  82% { transform: translate3d(-2px,2px,0) rotate(-0.1deg); }
+}
+
+@media (max-width: 760px) {
+  .hyper-blast__blob {
+    filter:
+      drop-shadow(0 0 10px rgba(255,253,240,0.62))
+      drop-shadow(3px 3px 0 rgba(0,0,0,0.14));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hyper-blast__wash,
+  .hyper-blast__foam,
+  .hyper-blast__blob,
+  .is-hyper-blasting .stage,
+  .is-hyper-blasting .marquee,
+  .is-hyper-blasting .flying-eggs {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

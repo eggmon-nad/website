@@ -378,6 +378,7 @@
      ===================================================== */
   const SLIME_SRC = './sounds/slime-squish.mp3';
   const AUGH_SRC = './sounds/augh-meme.mp3';
+  const HYPER_ORGASM_SRC = './sounds/hyper-orgasm.mp3';
   const MAX_ACTIVE_SLIMES = 12;
   const activeSlimes = new Set();
 
@@ -430,6 +431,24 @@
     } catch (_) {}
   }
 
+  function playHyperOrgasmOnce() {
+    try {
+      const audio = createAudio(HYPER_ORGASM_SRC, 0.74);
+      audio.loop = false;
+      audio.currentTime = 0;
+
+      const cleanup = () => {
+        audio.removeEventListener('ended', cleanup);
+        audio.removeEventListener('error', cleanup);
+      };
+      audio.addEventListener('ended', cleanup);
+      audio.addEventListener('error', cleanup);
+
+      const playPromise = audio.play();
+      if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(cleanup);
+    } catch (_) {}
+  }
+
   let audioWarmed = false;
 
   function warmAudio() {
@@ -438,6 +457,7 @@
     // Browsers unlock audio on user gesture; metadata preloading avoids the worst first-play lag.
     createAudio(SLIME_SRC, 0.48).load();
     createAudio(AUGH_SRC, 0.42).load();
+    createAudio(HYPER_ORGASM_SRC, 0.74).load();
   }
 
   window.addEventListener('pointerdown', warmAudio, { once: true, passive: true });
@@ -464,7 +484,9 @@
   const TOKEN_IMAGE_URL = `${window.location.origin}/favicon.png`;
   const DEXSCREENER_PAIR_API = 'https://api.dexscreener.com/latest/dex/pairs/monad/0xd57e82e32ff8bdb26d5984e4e73c14c2145d8ed4';
   const MARKET_REFRESH_MS = 60_000;
-  const BLAST_CYCLE = 690;
+  const BLAST_MIN = 133;
+  const BLAST_MAX = 333;
+  const BLAST_STEPS = BLAST_MAX - BLAST_MIN + 1;
 
   const marketEls = {
     status: document.getElementById('market-status'),
@@ -569,16 +591,18 @@
 
   function getBlastState(total) {
     const safeTotal = parseCounterValue(total);
-    const rawCycle = safeTotal % BLAST_CYCLE;
-    const cycleCount = safeTotal > 0 && rawCycle === 0 ? BLAST_CYCLE : rawCycle;
-    const progress = safeTotal > 0 ? Math.max(2, Math.min(100, (cycleCount / BLAST_CYCLE) * 100)) : 0;
+    const offset = safeTotal % BLAST_STEPS;
+    const cycleCount = BLAST_MIN + offset;
+    const rawProgress = ((cycleCount - BLAST_MIN) / (BLAST_MAX - BLAST_MIN)) * 100;
+    const progress = cycleCount === BLAST_MIN ? 2 : Math.max(2, Math.min(100, rawProgress));
 
     let label = 'WARMING UP';
-    if (progress >= 88) label = '🚨 RELEASE IMMINENT';
+    if (progress >= 99) label = '💦 FULL RELEASE';
+    else if (progress >= 88) label = '🚨 RELEASE IMMINENT';
     else if (progress >= 66) label = 'DANGEROUSLY LOADED';
     else if (progress >= 33) label = 'PRESSURE RISING';
 
-    return { cycleCount, progress, label };
+    return { cycleCount, progress, label, isRelease: cycleCount === BLAST_MAX };
   }
 
   function updateBlastStatus(total) {
@@ -586,7 +610,7 @@
     const state = getBlastState(total);
     blastEls.status.textContent = state.label;
     blastEls.fill.style.width = `${state.progress}%`;
-    blastEls.detail.textContent = `${state.cycleCount.toLocaleString()} / ${BLAST_CYCLE.toLocaleString()} pressure built`;
+    blastEls.detail.textContent = `${state.cycleCount.toLocaleString()} / ${BLAST_MAX.toLocaleString()} pressure built`;
   }
 
   function setCounter(value, { localFallback = false } = {}) {
@@ -793,11 +817,60 @@
     requestFxLoop();
   }
 
+  let hyperBlastTimer = null;
+
+  function triggerHyperBlast() {
+    document.querySelectorAll('.hyper-blast').forEach((node) => node.remove());
+    window.clearTimeout(hyperBlastTimer);
+
+    const blast = document.createElement('div');
+    blast.className = 'hyper-blast';
+    blast.setAttribute('aria-hidden', 'true');
+
+    const wash = document.createElement('div');
+    wash.className = 'hyper-blast__wash';
+    blast.appendChild(wash);
+
+    const foam = document.createElement('div');
+    foam.className = 'hyper-blast__foam';
+    blast.appendChild(foam);
+
+    const blobCount = innerWidth <= 640 ? 16 : 28;
+    for (let i = 0; i < blobCount; i++) {
+      const blob = document.createElement('span');
+      blob.className = 'hyper-blast__blob';
+      blob.style.setProperty('--x', String(rand(-6, 100)));
+      blob.style.setProperty('--s', `${rand(42, innerWidth <= 640 ? 130 : 210)}px`);
+      blob.style.setProperty('--d', `${rand(1.45, 2.35)}s`);
+      blob.style.setProperty('--delay', `${rand(0, 0.42)}s`);
+      blob.style.setProperty('--r', `${rand(-28, 28)}deg`);
+      blast.appendChild(blob);
+    }
+
+    document.body.appendChild(blast);
+    document.body.classList.add('is-hyper-blasting');
+    playHyperOrgasmOnce();
+
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate([60, 40, 90, 40, 140]); } catch (_) {}
+    }
+
+    hyperBlastTimer = window.setTimeout(() => {
+      document.body.classList.remove('is-hyper-blasting');
+      blast.remove();
+    }, 3600);
+  }
+
   function bumpCounter() {
     const optimisticCount = count + 1;
     setCounter(optimisticCount);
     popCounter();
     syncGlobalClick(optimisticCount);
+
+    if (getBlastState(optimisticCount).isRelease) {
+      triggerHyperBlast();
+    }
+
     return optimisticCount;
   }
 
