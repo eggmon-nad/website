@@ -3901,6 +3901,8 @@ a {
   justify-content: center;
   gap: 8px;
   text-decoration: none;
+  color: var(--black) !important;
+  -webkit-text-fill-color: var(--black);
 }
 .retention-card__vision-logo {
   width: 24px;
@@ -3911,6 +3913,9 @@ a {
 }
 .retention-card__vision span {
   line-height: 1;
+  color: var(--black) !important;
+  -webkit-text-fill-color: var(--black);
+  text-shadow: none !important;
 }
 .retention-card__copy.is-copied { background: #d8b8ff; }
 .retention-list {
