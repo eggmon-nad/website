@@ -3812,7 +3812,7 @@ a {
   padding: 7px 11px;
 }
 .retention-card__eyebrow {
-  background: #9cff9c;
+  background: #d8b8ff;
   transform: rotate(-1deg);
 }
 .retention-card__status {
@@ -3861,9 +3861,9 @@ a {
 .retention-card__stats span {
   display: block;
   color: var(--magenta);
-  font-family: var(--ui-font);
-  font-weight: 900;
-  letter-spacing: -0.015em;
+  font-family: var(--shitfont);
+  font-weight: 400;
+  letter-spacing: 0.01em;
   font-size: clamp(18px, 2.5vw, 24px);
   line-height: 1;
   margin-bottom: 6px;
@@ -3882,7 +3882,7 @@ a {
 .retention-card__copy {
   margin-top: 8px;
   width: 100%;
-  background: #9cff9c;
+  background: #d8b8ff;
   color: var(--text);
   border: 3px solid var(--black);
   border-radius: 10px;
@@ -3894,7 +3894,13 @@ a {
 .retention-card__copy:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--black); }
 .retention-card__copy:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--black); }
 .retention-card__copy.is-disabled { opacity: 0.55; cursor: not-allowed; }
-.retention-card__copy.is-copied { background: #9cff9c; }
+.retention-card__monadscan {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.retention-card__copy.is-copied { background: #d8b8ff; }
 .retention-list {
   position: relative;
   z-index: 1;
@@ -3922,8 +3928,9 @@ a {
 .retention-list__rank {
   min-width: 56px;
   color: var(--magenta);
-  font-family: var(--ui-font);
-  font-weight: 950;
+  font-family: var(--shitfont);
+  font-weight: 400;
+  letter-spacing: 0.01em;
   font-size: clamp(30px, 4vw, 38px);
   line-height: 1;
   -webkit-text-stroke: 0.35px var(--white);
