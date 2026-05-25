@@ -3562,3 +3562,23 @@ body {
     transform: translate3d(0, 0, 0) !important;
   }
 }
+
+
+/* ---------- Bottom-only slow marquee polish ---------- */
+.marquee--bottom {
+  background: #72fe8c !important;
+}
+
+.marquee--bottom .marquee__track {
+  animation-name: eggmon-marquee-perfect-loop-reverse !important;
+  animation-duration: 92s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  will-change: transform !important;
+}
+
+@media (max-width: 700px) {
+  .marquee--bottom .marquee__track {
+    animation-duration: 78s !important;
+  }
+}
