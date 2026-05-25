@@ -7,7 +7,7 @@
 // Optional env:
 // - MONAD_RPC_URL: your Monad mainnet RPC URL. Defaults to https://rpc.monad.xyz
 // - EGGMON_RETENTION_LIMIT: leaderboard rows to return. Defaults to 25
-// - EGGMON_LOG_BATCH_SIZE: eth_getLogs batch size. Defaults to 5000 blocks
+// - EGGMON_LOG_BATCH_SIZE: eth_getLogs batch size. Defaults to 1000 blocks
 // - EGGMON_RETENTION_CACHE_MS: in-memory serverless cache TTL. Defaults to 30000 ms
 
 const EGGMON_TOKEN = '0xD10cf12099f5Fb424Bc77401DF49f0c785657777';
@@ -118,8 +118,10 @@ async function rpcCall(rpcUrl, method, params) {
   }
 
   if (!response.ok || data.error) {
-    const message = data.error?.message || `RPC request failed with status ${response.status}`;
-    throw new Error(message);
+    const message = data.error?.message || JSON.stringify(data.error || {}) || `RPC request failed with status ${response.status}`;
+    const err = new Error(`${method} failed: ${message}`);
+    err.code = 'RPC_ERROR';
+    throw err;
   }
 
   return data.result;
@@ -135,18 +137,33 @@ async function getLogsInBatches(rpcUrl, lockAddress, fromBlock, toBlock, batchSi
   const logs = [];
   let cursor = fromBlock;
   const lockTopic = topicForAddress(lockAddress);
+  let dynamicBatchSize = BigInt(batchSize);
 
   while (cursor <= toBlock) {
-    const end = cursor + BigInt(batchSize - 1) > toBlock ? toBlock : cursor + BigInt(batchSize - 1);
-    const batchLogs = await rpcCall(rpcUrl, 'eth_getLogs', [{
-      address: EGGMON_TOKEN,
-      fromBlock: toHexBlock(cursor),
-      toBlock: toHexBlock(end),
-      topics: [TRANSFER_TOPIC, null, lockTopic],
-    }]);
+    const end = cursor + dynamicBatchSize - 1n > toBlock ? toBlock : cursor + dynamicBatchSize - 1n;
 
-    if (Array.isArray(batchLogs)) logs.push(...batchLogs);
-    cursor = end + 1n;
+    try {
+      const batchLogs = await rpcCall(rpcUrl, 'eth_getLogs', [{
+        address: EGGMON_TOKEN,
+        fromBlock: toHexBlock(cursor),
+        toBlock: toHexBlock(end),
+        topics: [TRANSFER_TOPIC, null, lockTopic],
+      }]);
+
+      if (Array.isArray(batchLogs)) logs.push(...batchLogs);
+      cursor = end + 1n;
+      if (dynamicBatchSize < BigInt(batchSize)) {
+        dynamicBatchSize = dynamicBatchSize * 2n > BigInt(batchSize) ? BigInt(batchSize) : dynamicBatchSize * 2n;
+      }
+    } catch (error) {
+      if (dynamicBatchSize > 100n) {
+        dynamicBatchSize = dynamicBatchSize / 2n;
+        continue;
+      }
+
+      error.message = `${error.message} while scanning blocks ${cursor.toString()}-${end.toString()}`;
+      throw error;
+    }
   }
 
   return logs;
@@ -176,7 +193,7 @@ async function buildLeaderboard() {
   const latestBlock = parseHexBigInt(await rpcCall(rpcUrl, 'eth_blockNumber', []));
   const fromBlock = parseBlockNumber(process.env.EGGMON_LOCK_DEPLOY_BLOCK, 0n);
   const safeFromBlock = fromBlock > latestBlock ? latestBlock : fromBlock;
-  const batchSize = parsePositiveInt(process.env.EGGMON_LOG_BATCH_SIZE, 5000, 100, 50000);
+  const batchSize = parsePositiveInt(process.env.EGGMON_LOG_BATCH_SIZE, 1000, 100, 20000);
   const limit = parsePositiveInt(process.env.EGGMON_RETENTION_LIMIT, 25, 1, 100);
 
   const [logs, lockedBalance] = await Promise.all([
@@ -261,6 +278,8 @@ module.exports = async function handler(req, res) {
       code: error.code || 'RETENTION_API_ERROR',
       token: EGGMON_TOKEN,
       lockContract: displayAddress(process.env.EGGMON_LOCK_ADDRESS),
+      deployBlock: process.env.EGGMON_LOCK_DEPLOY_BLOCK || '',
+      rpcConfigured: Boolean(process.env.MONAD_RPC_URL),
       leaderboard: [],
     });
   }

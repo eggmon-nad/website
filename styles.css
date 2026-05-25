@@ -3827,9 +3827,9 @@ a {
   font-size: clamp(30px, 5.5vw, 54px);
   line-height: 0.92;
   color: var(--text);
-  -webkit-text-stroke: 1.2px var(--white);
-  paint-order: stroke fill;
-  text-shadow: 4px 4px 0 var(--black);
+  -webkit-text-stroke: 0;
+  paint-order: normal;
+  text-shadow: none !important;
   margin-bottom: 12px;
 }
 .retention-card__intro,
