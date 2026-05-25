@@ -3345,3 +3345,63 @@ a {
   50% { transform: translate3d(-1.8vw, -3vh, 0) rotate(-6deg) scale(1.04); }
 }
 
+
+
+/* ---------- Seamless no-blank marquee loop ---------- */
+.marquee--top,
+.marquee--bottom {
+  background: #72fe8c !important;
+}
+
+.marquee {
+  overflow: hidden !important;
+  width: 100% !important;
+  max-width: 100vw !important;
+}
+
+.marquee__track {
+  display: flex !important;
+  flex-wrap: nowrap !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  white-space: nowrap !important;
+  gap: 0 !important;
+  will-change: transform !important;
+  backface-visibility: hidden !important;
+  transform: translate3d(0, 0, 0);
+  animation: eggmon-marquee-seamless 34s linear infinite !important;
+}
+
+.marquee--bottom .marquee__track {
+  animation: eggmon-marquee-seamless-reverse 38s linear infinite !important;
+}
+
+.marquee__track > span {
+  display: inline-flex !important;
+  align-items: center !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  padding: 0 18px !important;
+}
+
+@keyframes eggmon-marquee-seamless {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes eggmon-marquee-seamless-reverse {
+  from { transform: translate3d(-50%, 0, 0); }
+  to { transform: translate3d(0, 0, 0); }
+}
+
+@media (max-width: 420px) {
+  .marquee__track > span {
+    padding: 0 12px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track {
+    animation: none !important;
+  }
+}
