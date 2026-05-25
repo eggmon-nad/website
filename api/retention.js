@@ -7,8 +7,9 @@
 // Optional env:
 // - MONAD_RPC_URL: your Monad mainnet RPC URL. Defaults to https://rpc.monad.xyz
 // - EGGMON_RETENTION_LIMIT: leaderboard rows to return. Defaults to 25
-// - EGGMON_LOG_BATCH_SIZE: eth_getLogs batch size. Defaults to 1000 blocks
+// - EGGMON_LOG_BATCH_SIZE: eth_getLogs batch size. Defaults to 25 blocks
 // - EGGMON_RETENTION_CACHE_MS: in-memory serverless cache TTL. Defaults to 30000 ms
+// - EGGMON_LOG_RETRY_DELAY_MS: delay between RPC retries. Defaults to 500 ms
 
 const EGGMON_TOKEN = '0xD10cf12099f5Fb424Bc77401DF49f0c785657777';
 const TOKEN_DECIMALS = 18;
@@ -122,10 +123,8 @@ async function rpcCall(rpcUrl, method, params) {
   }
 
   if (!response.ok || data.error) {
-    const message = data.error?.message || JSON.stringify(data.error || {}) || `RPC request failed with status ${response.status}`;
-    const err = new Error(`${method} failed: ${message}`);
-    err.code = 'RPC_ERROR';
-    throw err;
+    const message = data.error?.message || `RPC request failed with status ${response.status}`;
+    throw new Error(message);
   }
 
   return data.result;
@@ -162,9 +161,7 @@ async function getLogsInBatches(rpcUrl, lockAddress, fromBlock, toBlock, batchSi
           topics: [TRANSFER_TOPIC, null, lockTopic],
         }]);
 
-        if (Array.isArray(batchLogs)) {
-          logs.push(...batchLogs);
-        }
+        if (Array.isArray(batchLogs)) logs.push(...batchLogs);
 
         cursor = end + 1n;
         batchSucceeded = true;
@@ -179,16 +176,13 @@ async function getLogsInBatches(rpcUrl, lockAddress, fromBlock, toBlock, batchSi
         break;
       } catch (error) {
         lastError = error;
-
         if (retryDelayMs > 0) {
           await sleep(retryDelayMs * attempt);
         }
       }
     }
 
-    if (batchSucceeded) {
-      continue;
-    }
+    if (batchSucceeded) continue;
 
     if (dynamicBatchSize > 1n) {
       dynamicBatchSize = dynamicBatchSize / 2n;
@@ -310,8 +304,6 @@ module.exports = async function handler(req, res) {
       code: error.code || 'RETENTION_API_ERROR',
       token: EGGMON_TOKEN,
       lockContract: displayAddress(process.env.EGGMON_LOCK_ADDRESS),
-      deployBlock: process.env.EGGMON_LOCK_DEPLOY_BLOCK || '',
-      rpcConfigured: Boolean(process.env.MONAD_RPC_URL),
       leaderboard: [],
     });
   }

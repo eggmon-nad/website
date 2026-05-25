@@ -3889,16 +3889,28 @@ a {
   padding: 8px 10px;
   box-shadow: 3px 3px 0 var(--black);
   font-size: clamp(15px, 2vw, 18px);
+  font-family: var(--shitfont);
   touch-action: manipulation;
 }
 .retention-card__copy:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--black); }
 .retention-card__copy:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--black); }
 .retention-card__copy.is-disabled { opacity: 0.55; cursor: not-allowed; }
-.retention-card__monadscan {
+.retention-card__vision {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   text-decoration: none;
+}
+.retention-card__vision-logo {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
+  border-radius: 7px;
+  box-shadow: 1px 1px 0 var(--black);
+}
+.retention-card__vision span {
+  line-height: 1;
 }
 .retention-card__copy.is-copied { background: #d8b8ff; }
 .retention-list {

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="MonadVision logo mark">
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="#7B61FF"/>
+  <path d="M32 11 47 19.5v17L32 45 17 36.5v-17L32 11Z" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M32 11v17m0 17V28M17 19.5 32 28l15-8.5M17 36.5 32 28l15 8.5" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 24h16M24 40h16" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".9"/>
+</svg>
