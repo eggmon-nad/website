@@ -842,14 +842,11 @@
 
   const HYPER_BLAST_DURATION = 10000; // full 10 seconds of nonstop slime
   let hyperBlastTimers = [];
-  let hyperBlastSoundTimer = null;
 
   function clearHyperBlastTimers() {
     hyperBlastTimers.forEach((id) => window.clearInterval(id));
     hyperBlastTimers.forEach((id) => window.clearTimeout(id));
     hyperBlastTimers = [];
-    window.clearTimeout(hyperBlastSoundTimer);
-    hyperBlastSoundTimer = null;
   }
 
   // Persistent layer: stains deposited here STAY on the page after the eruption.
@@ -960,10 +957,8 @@
       }, isSmall ? 320 : 230));
     }
 
-    // Loop the slime sound across the whole 10s window.
+    // Play the hyper sound through exactly once for the whole eruption.
     playHyperOnce();
-    hyperBlastSoundTimer = window.setInterval(() => playHyperOnce(), 1600);
-    hyperBlastTimers.push(hyperBlastSoundTimer);
 
     if ('vibrate' in navigator) {
       try { navigator.vibrate([60, 40, 90, 40, 140, 40, 90, 40, 160]); } catch (_) {}
