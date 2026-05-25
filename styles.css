@@ -3407,178 +3407,21 @@ a {
 }
 
 
-/* ---------- Final performance + UX pass ---------- */
-:root {
-  --egg-green: #72fe8c;
+/* ---------- Clean rollback: bottom-only marquee, smooth and slow ---------- */
+.marquee--top {
+  display: none !important;
 }
 
-html,
-body {
-  overscroll-behavior-x: none;
-}
-
-body {
-  text-rendering: optimizeLegibility;
-}
-
-.stage,
-.live-stack,
-.button-grid,
-.lore-card,
-.disclaimer {
-  contain: layout paint;
-}
-
-.market-card,
-.blast-card,
-.wallet-panel-button,
-.ca-bar,
-.counter-block,
-.token-info-card--modal {
-  contain: layout paint;
-}
-
-.button-grid,
-.lore-card,
-.disclaimer {
-  content-visibility: auto;
-  contain-intrinsic-size: 120px;
-}
-
-.mascot-wrap,
-.chunk-btn,
-.copy-btn,
-.wallet-panel-button {
-  touch-action: manipulation;
-}
-
-/* Lower animation cost: keep all background movement on compositor-only transforms. */
-.flying-eggs {
-  contain: strict !important;
-  pointer-events: none !important;
-  isolation: isolate !important;
-}
-
-.flying-egg,
-.flying-egg::before,
-.marquee__track {
-  will-change: transform !important;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden !important;
-}
-
-/* Seamless marquee: two identical groups slide by 50%, so no blank gap appears. */
-.marquee--top,
-.marquee--bottom {
-  background: var(--egg-green) !important;
-}
-
-.marquee {
-  overflow: hidden !important;
-  width: 100% !important;
-  max-width: 100vw !important;
-  contain: paint !important;
-}
-
-.marquee__track {
-  display: flex !important;
-  flex-wrap: nowrap !important;
-  width: max-content !important;
-  white-space: nowrap !important;
-  gap: 0 !important;
-  animation: eggmon-marquee-perfect-loop 30s linear infinite !important;
-}
-
-.marquee--bottom .marquee__track {
-  animation-name: eggmon-marquee-perfect-loop-reverse !important;
-  animation-duration: 34s !important;
-}
-
-.marquee__group {
-  display: inline-flex !important;
-  flex: 0 0 auto !important;
-  min-width: 100vw !important;
-  align-items: center !important;
-  justify-content: space-around !important;
-  white-space: nowrap !important;
-}
-
-.marquee__group > span,
-.marquee__track > span {
-  display: inline-flex !important;
-  flex: 0 0 auto !important;
-  align-items: center !important;
-  white-space: nowrap !important;
-  padding: 0 clamp(14px, 1.6vw, 24px) !important;
-}
-
-@keyframes eggmon-marquee-perfect-loop {
-  from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
-}
-
-@keyframes eggmon-marquee-perfect-loop-reverse {
-  from { transform: translate3d(-50%, 0, 0); }
-  to { transform: translate3d(0, 0, 0); }
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .chunk-btn,
-  .copy-btn,
-  .wallet-panel-button,
-  .ca-bar {
-    transition-duration: 0.12s !important;
-  }
-}
-
-@media (max-width: 700px) {
-  .button-grid,
-  .lore-card,
-  .disclaimer {
-    content-visibility: visible;
-  }
-
-  .marquee__track {
-    animation-duration: 24s !important;
-  }
-
-  .marquee--bottom .marquee__track {
-    animation-duration: 28s !important;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .marquee__track,
-  .flying-egg,
-  .flying-egg::before,
-  .title,
-  .click-prompt,
-  body::after,
-  .mascot-wrap::before {
-    animation: none !important;
-  }
-
-  .marquee__track {
-    transform: translate3d(0, 0, 0) !important;
-  }
-}
-
-
-/* ---------- Bottom-only slow marquee polish ---------- */
 .marquee--bottom {
   background: #72fe8c !important;
 }
 
 .marquee--bottom .marquee__track {
-  animation-name: eggmon-marquee-perfect-loop-reverse !important;
-  animation-duration: 92s !important;
-  animation-timing-function: linear !important;
-  animation-iteration-count: infinite !important;
-  will-change: transform !important;
+  animation: eggmon-marquee-seamless-reverse 72s linear infinite !important;
 }
 
 @media (max-width: 700px) {
   .marquee--bottom .marquee__track {
-    animation-duration: 78s !important;
+    animation-duration: 58s !important;
   }
 }
