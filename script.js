@@ -506,7 +506,9 @@
   const TOKEN_DECIMALS = 18;
   const TOKEN_IMAGE_URL = 'https://gateway.pinata.cloud/ipfs/bafkreibpzqgpv5sy7hgwsad3thnjymkn4wuqte5oru23udw63jb53zjpvm';
   const DEXSCREENER_PAIR_API = 'https://api.dexscreener.com/latest/dex/pairs/monad/0xd57e82e32ff8bdb26d5984e4e73c14c2145d8ed4';
+  const RETENTION_API = `${window.location.origin}/api/retention`;
   const MARKET_REFRESH_MS = 60_000;
+  const RETENTION_REFRESH_MS = 120_000;
   const BLAST_MIN = 1;
   const BLAST_MAX = 33;
   const BLAST_STEPS = BLAST_MAX - BLAST_MIN + 1;
@@ -524,6 +526,15 @@
     status: document.getElementById('blast-status'),
     fill: document.getElementById('blast-meter-fill'),
     detail: document.getElementById('blast-detail'),
+  };
+
+  const retentionEls = {
+    status: document.getElementById('retention-status'),
+    total: document.getElementById('retention-total'),
+    wallets: document.getElementById('retention-wallets'),
+    lockAddress: document.getElementById('retention-lock-address'),
+    list: document.getElementById('retention-list'),
+    copyLock: document.getElementById('copy-lock-ca'),
   };
 
   let count = 0;
@@ -609,6 +620,119 @@
       console.warn('[EGGMON] Market stats unavailable:', error);
       setMarketStatus('Retrying', 'error');
       marketEls.price.textContent = marketEls.price.textContent === '--' ? 'Stats sleeping' : marketEls.price.textContent;
+    }
+  }
+
+
+  function setRetentionStatus(text, mode = '') {
+    if (!retentionEls.status) return;
+    retentionEls.status.textContent = text;
+    retentionEls.status.classList.toggle('is-live', mode === 'live');
+    retentionEls.status.classList.toggle('is-error', mode === 'error');
+  }
+
+  function shortenAddress(address) {
+    const clean = String(address || '').trim();
+    if (!clean || clean.length < 12) return clean || '--';
+    return `${clean.slice(0, 6)}...${clean.slice(-4)}`;
+  }
+
+  function clearRetentionList() {
+    if (!retentionEls.list) return;
+    while (retentionEls.list.firstChild) {
+      retentionEls.list.removeChild(retentionEls.list.firstChild);
+    }
+  }
+
+  function renderRetentionEmpty(message) {
+    if (!retentionEls.list) return;
+    clearRetentionList();
+    const item = document.createElement('li');
+    item.className = 'retention-list__empty';
+    item.textContent = message;
+    retentionEls.list.appendChild(item);
+  }
+
+  function renderRetentionRows(rows) {
+    if (!retentionEls.list) return;
+    clearRetentionList();
+
+    if (!Array.isArray(rows) || rows.length === 0) {
+      renderRetentionEmpty('No retainers yet. Be the first wallet to lock the load.');
+      return;
+    }
+
+    rows.forEach((row) => {
+      const item = document.createElement('li');
+      item.className = 'retention-list__row';
+
+      const rank = document.createElement('span');
+      rank.className = 'retention-list__rank';
+      rank.textContent = `#${row.rank}`;
+
+      const wallet = document.createElement('a');
+      wallet.className = 'retention-list__wallet';
+      wallet.href = `https://monadscan.com/address/${row.address}`;
+      wallet.target = '_blank';
+      wallet.rel = 'noopener noreferrer';
+      wallet.textContent = shortenAddress(row.address);
+      wallet.title = row.address;
+
+      const amount = document.createElement('strong');
+      amount.className = 'retention-list__amount';
+      amount.textContent = `${row.formatted} $EGG`;
+
+      item.append(rank, wallet, amount);
+      retentionEls.list.appendChild(item);
+    });
+  }
+
+  function setRetentionLockAddress(address) {
+    const clean = String(address || '').trim();
+    if (!retentionEls.lockAddress) return;
+    retentionEls.lockAddress.textContent = clean ? shortenAddress(clean) : '--';
+    retentionEls.lockAddress.title = clean || 'Lock contract not configured yet';
+    retentionEls.lockAddress.dataset.address = clean;
+    if (retentionEls.copyLock) {
+      retentionEls.copyLock.disabled = !clean;
+      retentionEls.copyLock.classList.toggle('is-disabled', !clean);
+    }
+  }
+
+  async function fetchRetentionLeaderboard() {
+    if (!retentionEls.status) return;
+    setRetentionStatus('Updating');
+
+    try {
+      const response = await fetch(RETENTION_API, {
+        method: 'GET',
+        cache: 'no-store',
+        headers: { 'Accept': 'application/json' },
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || data.ok === false) {
+        const err = new Error(data.error || `Retention API returned ${response.status}`);
+        err.code = data.code || 'RETENTION_API_ERROR';
+        err.lockContract = data.lockContract || '';
+        throw err;
+      }
+
+      setRetentionStatus(data.cached ? 'Cached' : 'Live', 'live');
+      if (retentionEls.total) retentionEls.total.textContent = `${data.lockedBalanceFormatted || data.totalFormatted || '--'} $EGG`;
+      if (retentionEls.wallets) retentionEls.wallets.textContent = Number(data.uniqueWallets || 0).toLocaleString();
+      setRetentionLockAddress(data.lockContract);
+      renderRetentionRows(data.leaderboard);
+    } catch (error) {
+      console.warn('[EGGMON] Retention leaderboard unavailable:', error);
+      const needsConfig = error.code === 'LOCK_NOT_CONFIGURED' || error.code === 'DEPLOY_BLOCK_NOT_CONFIGURED';
+      setRetentionStatus(needsConfig ? 'Config needed' : 'Retrying', 'error');
+      if (retentionEls.total && retentionEls.total.textContent === '--') retentionEls.total.textContent = needsConfig ? 'Needs env' : 'Sleeping';
+      if (retentionEls.wallets && retentionEls.wallets.textContent === '--') retentionEls.wallets.textContent = '--';
+      setRetentionLockAddress(error.lockContract || '');
+      renderRetentionEmpty(needsConfig
+        ? 'Leaderboard is ready, but the lock address/deployment block still needs to be configured in Vercel.'
+        : 'Leaderboard is not synced yet. The lock is real, the website goblin is just catching up.');
     }
   }
 
@@ -1323,6 +1447,49 @@
       }, 1400);
     }
   }
+
+
+  async function copyLockContract() {
+    const text = retentionEls.lockAddress?.dataset.address || '';
+    if (!text) {
+      showToast('LOCK CA NOT CONFIGURED YET');
+      return;
+    }
+
+    let ok = false;
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        ok = true;
+      }
+    } catch (_) {}
+
+    if (!ok) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { ok = document.execCommand('copy'); } catch (_) {}
+      ta.remove();
+    }
+
+    showToast(ok ? 'LOCK CA COPIED — RETAIN RESPONSIBLY' : 'COPY FAILED — TRY AGAIN');
+
+    if (retentionEls.copyLock) {
+      const original = retentionEls.copyLock.dataset.originalText || retentionEls.copyLock.textContent;
+      retentionEls.copyLock.dataset.originalText = original;
+      retentionEls.copyLock.textContent = ok ? 'COPIED ✓' : 'OOPS';
+      retentionEls.copyLock.classList.add('is-copied');
+      setTimeout(() => {
+        retentionEls.copyLock.textContent = original;
+        retentionEls.copyLock.classList.remove('is-copied');
+      }, 1400);
+    }
+  }
+
+  if (retentionEls.copyLock) retentionEls.copyLock.addEventListener('click', copyLockContract);
 
   copyBtn.addEventListener('click', async (e) => {
     e.stopPropagation();

@@ -3764,3 +3764,210 @@ a {
     animation-duration: 1ms !important;
   }
 }
+
+
+/* ---------- CUM RETENTION leaderboard ---------- */
+.retention-card {
+  width: 100%;
+  max-width: 760px;
+  margin-top: 10px;
+  background: rgba(255, 253, 240, 0.94);
+  border: 4px solid var(--black);
+  border-radius: 22px;
+  padding: clamp(16px, 3vw, 24px);
+  box-shadow: 7px 7px 0 var(--black);
+  transform: rotate(-0.35deg);
+  position: relative;
+  overflow: hidden;
+}
+.retention-card::before {
+  content: '';
+  position: absolute;
+  inset: -40% -20% auto auto;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(95,237,223,0.46) 0%, rgba(95,237,223,0) 66%);
+  pointer-events: none;
+}
+.retention-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+.retention-card__eyebrow,
+.retention-card__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid var(--black);
+  border-radius: 999px;
+  box-shadow: 3px 3px 0 var(--black);
+  font-size: clamp(14px, 2vw, 18px);
+  letter-spacing: 1px;
+  line-height: 1;
+  padding: 7px 11px;
+}
+.retention-card__eyebrow {
+  background: var(--pink);
+  transform: rotate(-1deg);
+}
+.retention-card__status {
+  background: var(--white);
+  transform: rotate(1deg);
+}
+.retention-card__status.is-live { background: var(--mint); }
+.retention-card__status.is-error { background: var(--pink); }
+.retention-card h2 {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(30px, 5.5vw, 54px);
+  line-height: 0.92;
+  color: var(--text);
+  -webkit-text-stroke: 1.2px var(--white);
+  paint-order: stroke fill;
+  text-shadow: 3px 3px 0 var(--magenta), 5px 5px 0 var(--black);
+  margin-bottom: 12px;
+}
+.retention-card__intro,
+.retention-card__note {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(16px, 2.2vw, 21px);
+  line-height: 1.35;
+}
+.retention-card__stats {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+.retention-card__stats > div {
+  min-width: 0;
+  background: var(--white);
+  border: 3px solid var(--black);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 4px 4px 0 var(--black);
+}
+.retention-card__stats span {
+  display: block;
+  color: var(--magenta);
+  font-size: clamp(13px, 1.8vw, 16px);
+  margin-bottom: 4px;
+}
+.retention-card__stats strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: clamp(20px, 3vw, 29px);
+}
+.retention-card__lock strong {
+  font-family: 'Courier New', ui-monospace, monospace;
+  font-size: clamp(15px, 2.2vw, 20px);
+}
+.retention-card__copy {
+  margin-top: 8px;
+  width: 100%;
+  background: var(--mint);
+  color: var(--text);
+  border: 3px solid var(--black);
+  border-radius: 10px;
+  padding: 8px 10px;
+  box-shadow: 3px 3px 0 var(--black);
+  font-size: clamp(15px, 2vw, 18px);
+  touch-action: manipulation;
+}
+.retention-card__copy:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--black); }
+.retention-card__copy:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--black); }
+.retention-card__copy.is-disabled { opacity: 0.55; cursor: not-allowed; }
+.retention-card__copy.is-copied { background: var(--white); }
+.retention-list {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0 0 12px;
+  padding: 0;
+}
+.retention-list__row,
+.retention-list__empty {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.92);
+  border: 3px solid var(--black);
+  border-radius: 14px;
+  padding: 10px 12px;
+  box-shadow: 3px 3px 0 var(--black);
+  font-size: clamp(17px, 2.2vw, 23px);
+}
+.retention-list__row:nth-child(odd) { transform: rotate(0.2deg); }
+.retention-list__row:nth-child(even) { transform: rotate(-0.2deg); }
+.retention-list__rank {
+  min-width: 48px;
+  color: var(--magenta);
+  -webkit-text-stroke: 0.35px var(--white);
+  paint-order: stroke fill;
+}
+.retention-list__wallet {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Courier New', ui-monospace, monospace;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.retention-list__amount {
+  justify-self: end;
+  max-width: 230px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.retention-list__empty {
+  display: block;
+  text-align: center;
+}
+.retention-card__note {
+  font-size: clamp(14px, 2vw, 17px);
+  opacity: 0.88;
+}
+
+@media (max-width: 700px) {
+  .retention-card {
+    border-width: 3px;
+    border-radius: 18px;
+    transform: none;
+  }
+  .retention-card__top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .retention-card__stats {
+    grid-template-columns: 1fr;
+  }
+  .retention-list__row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .retention-list__amount {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    max-width: none;
+    background: var(--mint);
+    border: 2px solid var(--black);
+    border-radius: 10px;
+    padding: 5px 8px;
+    text-align: center;
+  }
+}

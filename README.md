@@ -151,3 +151,18 @@ const mouthY = rect.top  + rect.height * 0.24;
 ## License
 
 The site code is yours to do whatever with. The R3tards display font is by its respective author.
+
+## CUM RETENTION leaderboard
+
+The site now includes a CUM RETENTION leaderboard powered by `/api/retention`.
+It reads EGGMON `Transfer` events where the receiver is the EGGMON time-lock contract, groups by sender wallet, and sums repeat sends into one score.
+
+Set these Vercel Environment Variables before deploying the leaderboard live:
+
+```txt
+EGGMON_LOCK_ADDRESS=<deployed EGGMONTimeLock contract address>
+EGGMON_LOCK_DEPLOY_BLOCK=<deployment block number>
+MONAD_RPC_URL=<your Monad mainnet RPC URL>
+```
+
+`MONAD_RPC_URL` is optional because the API defaults to `https://rpc.monad.xyz`, but a dedicated RPC is better for reliability. `EGGMON_LOCK_DEPLOY_BLOCK` is required so the API scans only from the lock deployment onward.

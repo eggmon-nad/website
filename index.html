@@ -113,6 +113,38 @@
       </div>
     </section>
 
+
+    <section class="retention-card" aria-labelledby="retention-title">
+      <div class="retention-card__top">
+        <span class="retention-card__eyebrow">CUM RETENTION</span>
+        <span class="retention-card__status" id="retention-status">Loading</span>
+      </div>
+      <h2 id="retention-title">Who locked their load?</h2>
+      <p class="retention-card__intro">Send $EGG straight to the lock contract. The leaderboard reads on-chain transfers and stacks every wallet's deposits together.</p>
+
+      <div class="retention-card__stats" aria-label="EGGMON retention stats">
+        <div>
+          <span>Total retained</span>
+          <strong id="retention-total">--</strong>
+        </div>
+        <div>
+          <span>Retainers</span>
+          <strong id="retention-wallets">--</strong>
+        </div>
+        <div class="retention-card__lock">
+          <span>Lock contract</span>
+          <strong id="retention-lock-address">--</strong>
+          <button type="button" class="retention-card__copy is-disabled" id="copy-lock-ca" disabled>COPY LOCK</button>
+        </div>
+      </div>
+
+      <ol class="retention-list" id="retention-list">
+        <li class="retention-list__empty">Loading the most disciplined degenerates...</li>
+      </ol>
+
+      <p class="retention-card__note">Scores come from EGGMON Transfer events where the receiver is the lock contract. Multiple sends from the same wallet add up.</p>
+    </section>
+
     <nav class="button-grid" aria-label="Links">
       <a class="chunk-btn chunk-btn--primary"
          href="https://nad.fun/tokens/0xD10cf12099f5Fb424Bc77401DF49f0c785657777"
@@ -194,6 +226,10 @@
         <article>
           <h3>What is the contract?</h3>
           <p>0xD10cf12099f5Fb424Bc77401DF49f0c785657777</p>
+        </article>
+        <article>
+          <h3>What is CUM RETENTION?</h3>
+          <p>A public leaderboard for wallets that send $EGG into the time-lock. Send multiple times and your score stacks.</p>
         </article>
         <article>
           <h3>Is this financial advice?</h3>
