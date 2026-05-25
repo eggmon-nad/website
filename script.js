@@ -484,8 +484,8 @@
   const TOKEN_IMAGE_URL = `${window.location.origin}/favicon.png`;
   const DEXSCREENER_PAIR_API = 'https://api.dexscreener.com/latest/dex/pairs/monad/0xd57e82e32ff8bdb26d5984e4e73c14c2145d8ed4';
   const MARKET_REFRESH_MS = 60_000;
-  const BLAST_MIN = 133;
-  const BLAST_MAX = 333;
+  const BLAST_MIN = 1;
+  const BLAST_MAX = 33;
   const BLAST_STEPS = BLAST_MAX - BLAST_MIN + 1;
 
   const marketEls = {
