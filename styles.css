@@ -3829,15 +3829,15 @@ a {
   color: var(--text);
   -webkit-text-stroke: 0;
   paint-order: normal;
-  text-shadow: none !important;
+  text-shadow: none;
   margin-bottom: 12px;
 }
 .retention-card__intro,
 .retention-card__note {
   position: relative;
   z-index: 1;
-  font-size: clamp(16px, 2.2vw, 21px);
-  line-height: 1.35;
+  font-size: 13px;
+  line-height: 1.45;
 }
 .retention-card__stats {
   position: relative;
@@ -3858,7 +3858,7 @@ a {
 .retention-card__stats span {
   display: block;
   color: var(--magenta);
-  font-size: clamp(13px, 1.8vw, 16px);
+  font-size: clamp(16px, 2.15vw, 20px);
   margin-bottom: 4px;
 }
 .retention-card__stats strong {
@@ -3917,6 +3917,7 @@ a {
   color: var(--magenta);
   -webkit-text-stroke: 0.35px var(--white);
   paint-order: stroke fill;
+  font-size: clamp(24px, 3vw, 30px);
 }
 .retention-list__wallet {
   min-width: 0;
@@ -3940,7 +3941,8 @@ a {
   text-align: center;
 }
 .retention-card__note {
-  font-size: clamp(14px, 2vw, 17px);
+  font-size: 13px;
+  line-height: 1.45;
   opacity: 0.88;
 }
 
