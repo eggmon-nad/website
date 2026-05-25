@@ -504,7 +504,7 @@
   const TOKEN_ADDRESS = '0xD10cf12099f5Fb424Bc77401DF49f0c785657777';
   const TOKEN_SYMBOL = 'EGG';
   const TOKEN_DECIMALS = 18;
-  const TOKEN_IMAGE_URL = `${window.location.origin}/favicon.png`;
+  const TOKEN_IMAGE_URL = 'https://gateway.pinata.cloud/ipfs/bafkreibpzqgpv5sy7hgwsad3thnjymkn4wuqte5oru23udw63jb53zjpvm';
   const DEXSCREENER_PAIR_API = 'https://api.dexscreener.com/latest/dex/pairs/monad/0xd57e82e32ff8bdb26d5984e4e73c14c2145d8ed4';
   const MARKET_REFRESH_MS = 60_000;
   const BLAST_MIN = 1;
