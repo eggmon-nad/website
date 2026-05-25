@@ -76,6 +76,10 @@ function parsePositiveInt(value, fallback, min, max) {
   return Math.max(min, Math.min(max, parsed));
 }
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function parseHexBigInt(value) {
   const clean = String(value || '0x0');
   if (!/^0x[0-9a-fA-F]*$/.test(clean)) return 0n;
@@ -138,32 +142,62 @@ async function getLogsInBatches(rpcUrl, lockAddress, fromBlock, toBlock, batchSi
   let cursor = fromBlock;
   const lockTopic = topicForAddress(lockAddress);
   let dynamicBatchSize = BigInt(batchSize);
+  const maxBatchSize = BigInt(batchSize);
+  const retryDelayMs = parsePositiveInt(process.env.EGGMON_LOG_RETRY_DELAY_MS, 500, 0, 5000);
 
   while (cursor <= toBlock) {
-    const end = cursor + dynamicBatchSize - 1n > toBlock ? toBlock : cursor + dynamicBatchSize - 1n;
+    const end = cursor + dynamicBatchSize - 1n > toBlock
+      ? toBlock
+      : cursor + dynamicBatchSize - 1n;
 
-    try {
-      const batchLogs = await rpcCall(rpcUrl, 'eth_getLogs', [{
-        address: EGGMON_TOKEN,
-        fromBlock: toHexBlock(cursor),
-        toBlock: toHexBlock(end),
-        topics: [TRANSFER_TOPIC, null, lockTopic],
-      }]);
+    let batchSucceeded = false;
+    let lastError = null;
 
-      if (Array.isArray(batchLogs)) logs.push(...batchLogs);
-      cursor = end + 1n;
-      if (dynamicBatchSize < BigInt(batchSize)) {
-        dynamicBatchSize = dynamicBatchSize * 2n > BigInt(batchSize) ? BigInt(batchSize) : dynamicBatchSize * 2n;
+    for (let attempt = 1; attempt <= 4; attempt++) {
+      try {
+        const batchLogs = await rpcCall(rpcUrl, 'eth_getLogs', [{
+          address: EGGMON_TOKEN,
+          fromBlock: toHexBlock(cursor),
+          toBlock: toHexBlock(end),
+          topics: [TRANSFER_TOPIC, null, lockTopic],
+        }]);
+
+        if (Array.isArray(batchLogs)) {
+          logs.push(...batchLogs);
+        }
+
+        cursor = end + 1n;
+        batchSucceeded = true;
+        lastError = null;
+
+        if (dynamicBatchSize < maxBatchSize) {
+          dynamicBatchSize = dynamicBatchSize * 2n > maxBatchSize
+            ? maxBatchSize
+            : dynamicBatchSize * 2n;
+        }
+
+        break;
+      } catch (error) {
+        lastError = error;
+
+        if (retryDelayMs > 0) {
+          await sleep(retryDelayMs * attempt);
+        }
       }
-    } catch (error) {
-      if (dynamicBatchSize > 100n) {
-        dynamicBatchSize = dynamicBatchSize / 2n;
-        continue;
-      }
-
-      error.message = `${error.message} while scanning blocks ${cursor.toString()}-${end.toString()}`;
-      throw error;
     }
+
+    if (batchSucceeded) {
+      continue;
+    }
+
+    if (dynamicBatchSize > 1n) {
+      dynamicBatchSize = dynamicBatchSize / 2n;
+      if (dynamicBatchSize < 1n) dynamicBatchSize = 1n;
+      continue;
+    }
+
+    lastError.message = `${lastError.message} while scanning block ${cursor.toString()}`;
+    throw lastError;
   }
 
   return logs;
@@ -193,13 +227,11 @@ async function buildLeaderboard() {
   const latestBlock = parseHexBigInt(await rpcCall(rpcUrl, 'eth_blockNumber', []));
   const fromBlock = parseBlockNumber(process.env.EGGMON_LOCK_DEPLOY_BLOCK, 0n);
   const safeFromBlock = fromBlock > latestBlock ? latestBlock : fromBlock;
-  const batchSize = parsePositiveInt(process.env.EGGMON_LOG_BATCH_SIZE, 1000, 100, 20000);
+  const batchSize = parsePositiveInt(process.env.EGGMON_LOG_BATCH_SIZE, 25, 1, 20000);
   const limit = parsePositiveInt(process.env.EGGMON_RETENTION_LIMIT, 25, 1, 100);
 
-  const [logs, lockedBalance] = await Promise.all([
-    getLogsInBatches(rpcUrl, lockAddress, safeFromBlock, latestBlock, batchSize),
-    getLockedBalance(rpcUrl, lockAddress),
-  ]);
+  const logs = await getLogsInBatches(rpcUrl, lockAddress, safeFromBlock, latestBlock, batchSize);
+  const lockedBalance = await getLockedBalance(rpcUrl, lockAddress);
 
   const totals = new Map();
   let totalDeposited = 0n;
