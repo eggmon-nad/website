@@ -715,7 +715,6 @@
         const err = new Error(data.error || `Retention API returned ${response.status}`);
         err.code = data.code || 'RETENTION_API_ERROR';
         err.lockContract = data.lockContract || '';
-        err.status = response.status;
         throw err;
       }
 
@@ -731,12 +730,9 @@
       if (retentionEls.total && retentionEls.total.textContent === '--') retentionEls.total.textContent = needsConfig ? 'Needs env' : 'Sleeping';
       if (retentionEls.wallets && retentionEls.wallets.textContent === '--') retentionEls.wallets.textContent = '--';
       setRetentionLockAddress(error.lockContract || '');
-      const safeMessage = String(error.message || '').slice(0, 180);
       renderRetentionEmpty(needsConfig
         ? 'Leaderboard is ready, but the lock address/deployment block still needs to be configured in Vercel.'
-        : safeMessage
-          ? `Leaderboard API error: ${safeMessage}`
-          : 'Leaderboard API is retrying. Check the Monad RPC URL and deploy block in Vercel.');
+        : 'Leaderboard is not synced yet. The lock is real, the website goblin is just catching up.');
     }
   }
 

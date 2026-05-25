@@ -3875,10 +3875,36 @@ a {
   white-space: nowrap;
   font-size: clamp(20px, 3vw, 29px);
 }
+.retention-card__lock-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
 .retention-card__lock strong {
+  flex: 1 1 auto;
+  min-width: 0;
   font-family: 'Courier New', ui-monospace, monospace;
   font-size: clamp(15px, 2.2vw, 20px);
 }
+.retention-card__mini-copy {
+  flex: 0 0 auto;
+  background: #d8b8ff;
+  color: var(--black) !important;
+  -webkit-text-fill-color: var(--black);
+  border: 2px solid var(--black);
+  border-radius: 9px;
+  padding: 6px 8px;
+  box-shadow: 2px 2px 0 var(--black);
+  font-family: var(--shitfont);
+  font-size: clamp(13px, 1.7vw, 16px);
+  line-height: 1;
+  touch-action: manipulation;
+}
+.retention-card__mini-copy:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--black); }
+.retention-card__mini-copy:active { transform: translate(1px, 1px); box-shadow: 1px 1px 0 var(--black); }
+.retention-card__mini-copy.is-disabled { opacity: 0.55; cursor: not-allowed; }
+.retention-card__mini-copy.is-copied { background: #9cff9c; }
 .retention-card__copy {
   margin-top: 8px;
   width: 100%;
