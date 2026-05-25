@@ -889,6 +889,8 @@
   updateBlastStatus(count);
   fetchMarketStats();
   window.setInterval(fetchMarketStats, MARKET_REFRESH_MS);
+  fetchRetentionLeaderboard();
+  window.setInterval(fetchRetentionLeaderboard, RETENTION_REFRESH_MS);
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) flushGlobalClicks({ keepalive: true });

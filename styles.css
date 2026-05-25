@@ -3812,15 +3812,15 @@ a {
   padding: 7px 11px;
 }
 .retention-card__eyebrow {
-  background: var(--pink);
+  background: #9cff9c;
   transform: rotate(-1deg);
 }
 .retention-card__status {
-  background: var(--white);
+  background: #9cff9c;
   transform: rotate(1deg);
 }
-.retention-card__status.is-live { background: var(--mint); }
-.retention-card__status.is-error { background: var(--pink); }
+.retention-card__status.is-live { background: #9cff9c; }
+.retention-card__status.is-error { background: #9cff9c; }
 .retention-card h2 {
   position: relative;
   z-index: 1;
@@ -3829,7 +3829,7 @@ a {
   color: var(--text);
   -webkit-text-stroke: 1.2px var(--white);
   paint-order: stroke fill;
-  text-shadow: 3px 3px 0 var(--magenta), 5px 5px 0 var(--black);
+  text-shadow: 4px 4px 0 var(--black);
   margin-bottom: 12px;
 }
 .retention-card__intro,
@@ -3875,7 +3875,7 @@ a {
 .retention-card__copy {
   margin-top: 8px;
   width: 100%;
-  background: var(--mint);
+  background: #9cff9c;
   color: var(--text);
   border: 3px solid var(--black);
   border-radius: 10px;
@@ -3887,7 +3887,7 @@ a {
 .retention-card__copy:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--black); }
 .retention-card__copy:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--black); }
 .retention-card__copy.is-disabled { opacity: 0.55; cursor: not-allowed; }
-.retention-card__copy.is-copied { background: var(--white); }
+.retention-card__copy.is-copied { background: #9cff9c; }
 .retention-list {
   position: relative;
   z-index: 1;
