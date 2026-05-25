@@ -505,22 +505,33 @@
     } catch (_) {}
   }
 
+  const usdFormatterCache = new Map();
+  const tinyPriceFormatter = new Intl.NumberFormat('en-US', { maximumFractionDigits: 8 });
+
+  function getUsdFormatter({ compact = true, maxFractionDigits = 2 } = {}) {
+    const key = `${compact ? 'compact' : 'standard'}-${maxFractionDigits}`;
+    if (!usdFormatterCache.has(key)) {
+      usdFormatterCache.set(key, new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        notation: compact ? 'compact' : 'standard',
+        maximumFractionDigits,
+      }));
+    }
+    return usdFormatterCache.get(key);
+  }
+
   function formatUsd(value, { compact = true, maxFractionDigits = 2 } = {}) {
     const number = Number(value);
     if (!Number.isFinite(number) || number <= 0) return '--';
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      notation: compact ? 'compact' : 'standard',
-      maximumFractionDigits: maxFractionDigits,
-    }).format(number);
+    return getUsdFormatter({ compact, maxFractionDigits }).format(number);
   }
 
   function formatTokenPrice(value) {
     const number = Number(value);
     if (!Number.isFinite(number) || number <= 0) return '--';
     if (number < 0.000001) return `$${number.toExponential(2)}`;
-    if (number < 0.01) return `$${number.toLocaleString('en-US', { maximumFractionDigits: 8 })}`;
+    if (number < 0.01) return `$${tinyPriceFormatter.format(number)}`;
     return formatUsd(number, { compact: false, maxFractionDigits: 6 });
   }
 
@@ -538,13 +549,37 @@
     marketEls.status.classList.toggle('is-error', mode === 'error');
   }
 
+  let marketRefreshTimer = null;
+  let marketAbortController = null;
+
+  function scheduleMarketRefresh(delay = MARKET_REFRESH_MS) {
+    window.clearTimeout(marketRefreshTimer);
+    marketRefreshTimer = null;
+    if (document.hidden || !marketEls.price) return;
+    marketRefreshTimer = window.setTimeout(refreshMarketStats, delay);
+  }
+
+  function stopMarketRefresh() {
+    window.clearTimeout(marketRefreshTimer);
+    marketRefreshTimer = null;
+    if (marketAbortController) {
+      marketAbortController.abort();
+      marketAbortController = null;
+    }
+  }
+
   async function fetchMarketStats() {
-    if (!marketEls.price) return;
+    if (!marketEls.price || document.hidden) return;
     setMarketStatus('Updating');
+
+    if (marketAbortController) marketAbortController.abort();
+    marketAbortController = new AbortController();
+    const timeoutId = window.setTimeout(() => marketAbortController?.abort(), 9000);
 
     try {
       const response = await fetch(DEXSCREENER_PAIR_API, {
         cache: 'no-store',
+        signal: marketAbortController.signal,
         headers: { 'Accept': 'application/json' },
       });
       if (!response.ok) throw new Error(`Dexscreener returned ${response.status}`);
@@ -561,10 +596,24 @@
       marketEls.change.textContent = formatPercent(pair.priceChange?.h24);
       setMarketStatus('Live', 'live');
     } catch (error) {
+      if (error?.name === 'AbortError') return;
       console.warn('[EGGMON] Market stats unavailable:', error);
       setMarketStatus('Retrying', 'error');
       marketEls.price.textContent = marketEls.price.textContent === '--' ? 'Stats sleeping' : marketEls.price.textContent;
+    } finally {
+      window.clearTimeout(timeoutId);
+      marketAbortController = null;
     }
+  }
+
+  async function refreshMarketStats() {
+    await fetchMarketStats();
+    scheduleMarketRefresh();
+  }
+
+  function startMarketRefresh() {
+    stopMarketRefresh();
+    refreshMarketStats();
   }
 
   function getBlastState(total) {
@@ -716,11 +765,15 @@
 
   fetchGlobalCount();
   updateBlastStatus(count);
-  fetchMarketStats();
-  window.setInterval(fetchMarketStats, MARKET_REFRESH_MS);
+  startMarketRefresh();
 
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) flushGlobalClicks({ keepalive: true });
+    if (document.hidden) {
+      flushGlobalClicks({ keepalive: true });
+      stopMarketRefresh();
+    } else {
+      startMarketRefresh();
+    }
   });
 
   window.addEventListener('pagehide', () => {
