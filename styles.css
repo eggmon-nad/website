@@ -1225,7 +1225,7 @@ a {
 }
 
 /* =========================================================
-   Feature layer: live stats, Cum Blast Status, FAQ, wallet UX
+   Feature layer: live stats, Blast Status, FAQ, wallet UX
    ========================================================= */
 .live-stack {
   width: 100%;
@@ -2098,7 +2098,7 @@ a {
   }
 }
 
-/* ---------- Compact Cum Blast Status card ---------- */
+/* ---------- Compact Blast Status card ---------- */
 .live-stack {
   align-items: start !important;
 }
@@ -2352,7 +2352,7 @@ a {
   }
 }
 
-/* ---------- Cum Blast Status hot gradient ---------- */
+/* ---------- Blast Status hot gradient ---------- */
 .blast-meter__fill {
   background: linear-gradient(
     90deg,
@@ -3452,7 +3452,7 @@ a {
     linear-gradient(180deg, rgba(255,253,240,0.98) 0%, rgba(255,253,240,0.92) 42%, rgba(255,253,240,0.68) 72%, rgba(255,253,240,0) 100%);
   filter: drop-shadow(0 0 24px rgba(255,253,240,0.78));
   transform: translateY(-115%) scale(1.04);
-  animation: hyper-wash-down 2.9s cubic-bezier(.12,.78,.14,1) forwards;
+  animation: hyper-wash-down 3.1s cubic-bezier(.12,.78,.14,1) infinite;
 }
 
 .hyper-blast__foam {
@@ -3464,7 +3464,7 @@ a {
     radial-gradient(circle at 70% 42%, rgba(255,255,255,0.98) 0 9%, transparent 10%),
     radial-gradient(circle at 88% 68%, rgba(255,253,240,0.98) 0 11%, transparent 12%);
   opacity: 0;
-  animation: hyper-foam-pop 2.8s ease-out forwards;
+  animation: hyper-foam-pop 2.6s ease-out infinite;
 }
 
 .hyper-blast__blob {
@@ -3489,7 +3489,7 @@ a {
 .is-hyper-blasting .stage,
 .is-hyper-blasting .marquee,
 .is-hyper-blasting .flying-eggs {
-  animation: hyper-site-shake 720ms cubic-bezier(.34,.02,.2,1.2) both;
+  animation: hyper-site-shake 1.4s cubic-bezier(.34,.02,.2,1.2) infinite;
 }
 
 .blast-card__top strong {
@@ -3578,5 +3578,189 @@ a {
   .is-hyper-blasting .flying-eggs {
     animation-duration: 1ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+/* ---------- Persistent slime stains + edge drips (33 release overflow) ---------- */
+
+/* Stains live in their own layer so they survive after the 10s eruption ends. */
+.slime-stain-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9998; /* just under the active .hyper-blast overlay */
+  pointer-events: none;
+  overflow: hidden;
+  contain: layout paint size;
+}
+
+/* A single splat: gooey white blob with a built-in highlight + cartoon outline,
+   matching Eggmon's existing #fffdf0 / soft-black-outline aesthetic. */
+.slime-stain {
+  position: absolute;
+  left: calc(var(--x) * 1%);
+  top: calc(var(--y) * 1%);
+  width: var(--s);
+  height: var(--s);
+  margin-left: calc(var(--s) / -2);
+  margin-top: calc(var(--s) / -2);
+  border-radius: var(--br, 58% 42% 55% 45% / 52% 56% 44% 48%);
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255,255,255,0.96) 0 16%, transparent 17%),
+    radial-gradient(circle at 64% 60%, rgba(255,253,240,0.6) 0 22%, transparent 23%),
+    #fffdf0;
+  border: 2px solid rgba(0,0,0,0.10);
+  box-shadow:
+    inset -4px -6px 0 rgba(0,0,0,0.05),
+    3px 4px 0 rgba(0,0,0,0.07);
+  transform: rotate(var(--r, 0deg)) scale(0);
+  transform-origin: 50% 30%;
+  animation: slime-stain-set 0.42s cubic-bezier(.2,1.4,.3,1) forwards;
+  will-change: transform;
+}
+
+/* Drip tendrils oozing off the bottom of each splat. */
+.slime-stain::before,
+.slime-stain::after {
+  content: "";
+  position: absolute;
+  top: 62%;
+  width: calc(var(--s) * 0.22);
+  background: #fffdf0;
+  border: 2px solid rgba(0,0,0,0.08);
+  border-top: none;
+  border-radius: 0 0 60% 60%;
+  transform-origin: 50% 0;
+  transform: scaleY(0);
+  animation: slime-drip-ooze 0.9s 0.18s cubic-bezier(.3,.7,.2,1) forwards;
+}
+.slime-stain::before { left: 26%; height: calc(var(--s) * 0.7); }
+.slime-stain::after  { left: 62%; height: calc(var(--s) * 0.46); animation-delay: 0.3s; }
+
+/* Long drips sliding down from the very top edge of the screen. */
+.slime-drip {
+  position: absolute;
+  top: 0;
+  left: calc(var(--x) * 1%);
+  width: var(--w, 26px);
+  height: var(--h, 120px);
+  margin-left: calc(var(--w, 26px) / -2);
+  background:
+    radial-gradient(circle at 50% 100%, rgba(255,255,255,0.9) 0 30%, transparent 31%),
+    linear-gradient(180deg, #fffdf0 0%, #fffdf0 78%, rgba(255,253,240,0) 100%);
+  border-left: 2px solid rgba(0,0,0,0.07);
+  border-right: 2px solid rgba(0,0,0,0.07);
+  border-radius: 0 0 50% 50% / 0 0 24px 24px;
+  transform-origin: 50% 0;
+  transform: scaleY(0);
+  animation: slime-drip-grow var(--d, 1.4s) cubic-bezier(.32,.66,.2,1) forwards;
+  will-change: transform;
+}
+/* The hanging blob at the tip of each top-edge drip. */
+.slime-drip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  width: calc(var(--w, 26px) * 1.5);
+  height: calc(var(--w, 26px) * 1.5);
+  margin-left: calc(var(--w, 26px) * -0.75);
+  border-radius: 52% 48% 46% 54%;
+  background:
+    radial-gradient(circle at 36% 30%, rgba(255,255,255,0.95) 0 18%, transparent 19%),
+    #fffdf0;
+  border: 2px solid rgba(0,0,0,0.08);
+}
+
+@keyframes slime-stain-set {
+  0%   { transform: rotate(var(--r,0deg)) scale(0); }
+  60%  { transform: rotate(var(--r,0deg)) scale(1.14); }
+  100% { transform: rotate(var(--r,0deg)) scale(1); }
+}
+@keyframes slime-drip-ooze {
+  0%   { transform: scaleY(0); }
+  100% { transform: scaleY(1); }
+}
+@keyframes slime-drip-grow {
+  0%   { transform: scaleY(0); }
+  70%  { transform: scaleY(1.06); }
+  100% { transform: scaleY(1); }
+}
+
+/* Gentle settle so the freshly-set stains feel wet, then hold forever. */
+.slime-stain.is-settling { animation: slime-stain-set 0.42s cubic-bezier(.2,1.4,.3,1) forwards, slime-stain-jiggle 0.6s 0.42s ease-out; }
+@keyframes slime-stain-jiggle {
+  0%, 100% { filter: none; }
+  50% { filter: brightness(1.06); }
+}
+
+/* Phones: thinner outlines + smaller hardware load already handled in JS via counts. */
+@media (max-width: 760px) {
+  .slime-stain { box-shadow: inset -3px -4px 0 rgba(0,0,0,0.05), 2px 3px 0 rgba(0,0,0,0.06); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slime-stain,
+  .slime-stain::before,
+  .slime-stain::after,
+  .slime-drip {
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+  }
+}
+
+/* ---------- Slime cleaning: wipe-away + squeegee smear ---------- */
+
+/* Stains/drips dissolve when wiped by finger or cursor. */
+.slime-stain.is-wiped,
+.slime-drip.is-wiped {
+  animation: slime-wipe-away 0.3s ease-in forwards !important;
+  pointer-events: none;
+}
+.slime-stain.is-wiped::before,
+.slime-stain.is-wiped::after {
+  animation: slime-wipe-away 0.3s ease-in forwards !important;
+}
+
+@keyframes slime-wipe-away {
+  0%   { opacity: 1; filter: blur(0); }
+  100% { opacity: 0; filter: blur(3px); transform: rotate(var(--r,0deg)) scale(0.42); }
+}
+
+/* Transient squeegee streak that follows the wipe gesture. */
+.slime-smear-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 10000; /* above everything so the wipe reads clearly */
+  pointer-events: none;
+  overflow: hidden;
+}
+.slime-smear {
+  position: absolute;
+  width: 120px;
+  height: 56px;
+  margin-left: -60px;
+  margin-top: -28px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 45%, transparent 72%);
+  transform: rotate(var(--r,0deg)) scale(0.6);
+  opacity: 0;
+  animation: slime-smear-fade 0.46s ease-out forwards;
+}
+@keyframes slime-smear-fade {
+  0%   { opacity: 0.9; transform: rotate(var(--r,0deg)) scale(0.6); }
+  100% { opacity: 0; transform: rotate(var(--r,0deg)) scale(1.25); }
+}
+
+@media (max-width: 760px) {
+  .slime-smear { width: 92px; height: 44px; margin-left: -46px; margin-top: -22px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slime-stain.is-wiped,
+  .slime-drip.is-wiped,
+  .slime-stain.is-wiped::before,
+  .slime-stain.is-wiped::after,
+  .slime-smear {
+    animation-duration: 1ms !important;
   }
 }

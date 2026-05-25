@@ -378,9 +378,11 @@
      ===================================================== */
   const SLIME_SRC = './sounds/slime-squish.mp3';
   const AUGH_SRC = './sounds/augh-meme.mp3';
-  const HYPER_ORGASM_SRC = './sounds/hyper-orgasm.mp3';
+  const HYPER_SRC = './sounds/hyper.mp3';
   const MAX_ACTIVE_SLIMES = 12;
   const activeSlimes = new Set();
+  const activeAughs = new Set();
+  let hyperAudioPlaying = false;
 
   function createAudio(src, volume) {
     const audio = new Audio(src);
@@ -416,10 +418,25 @@
     } catch (_) {}
   }
 
+  function stopActiveAughs() {
+    activeAughs.forEach((audio) => {
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+      } catch (_) {}
+    });
+    activeAughs.clear();
+  }
+
   function playAughFull() {
+    if (hyperAudioPlaying) return;
+
     try {
       const audio = createAudio(AUGH_SRC, 0.42);
+      activeAughs.add(audio);
+
       const cleanup = () => {
+        activeAughs.delete(audio);
         audio.removeEventListener('ended', cleanup);
         audio.removeEventListener('error', cleanup);
       };
@@ -431,13 +448,17 @@
     } catch (_) {}
   }
 
-  function playHyperOrgasmOnce() {
+  function playHyperOnce() {
     try {
-      const audio = createAudio(HYPER_ORGASM_SRC, 0.74);
+      stopActiveAughs();
+      hyperAudioPlaying = true;
+
+      const audio = createAudio(HYPER_SRC, 0.74);
       audio.loop = false;
       audio.currentTime = 0;
 
       const cleanup = () => {
+        hyperAudioPlaying = false;
         audio.removeEventListener('ended', cleanup);
         audio.removeEventListener('error', cleanup);
       };
@@ -446,7 +467,9 @@
 
       const playPromise = audio.play();
       if (playPromise && typeof playPromise.catch === 'function') playPromise.catch(cleanup);
-    } catch (_) {}
+    } catch (_) {
+      hyperAudioPlaying = false;
+    }
   }
 
   let audioWarmed = false;
@@ -457,7 +480,7 @@
     // Browsers unlock audio on user gesture; metadata preloading avoids the worst first-play lag.
     createAudio(SLIME_SRC, 0.48).load();
     createAudio(AUGH_SRC, 0.42).load();
-    createAudio(HYPER_ORGASM_SRC, 0.74).load();
+    createAudio(HYPER_SRC, 0.74).load();
   }
 
   window.addEventListener('pointerdown', warmAudio, { once: true, passive: true });
@@ -465,7 +488,7 @@
   function playEggSound(nextCount) {
     playSlimeStacked();
     if (nextCount > 0 && nextCount % 10 === 0) {
-      window.setTimeout(playAughFull, 80);
+      window.setTimeout(() => { if (!hyperAudioPlaying) playAughFull(); }, 80);
     }
   }
 
@@ -817,11 +840,92 @@
     requestFxLoop();
   }
 
-  let hyperBlastTimer = null;
+  const HYPER_BLAST_DURATION = 10000; // full 10 seconds of nonstop slime
+  let hyperBlastTimers = [];
+  let hyperBlastSoundTimer = null;
+
+  function clearHyperBlastTimers() {
+    hyperBlastTimers.forEach((id) => window.clearInterval(id));
+    hyperBlastTimers.forEach((id) => window.clearTimeout(id));
+    hyperBlastTimers = [];
+    window.clearTimeout(hyperBlastSoundTimer);
+    hyperBlastSoundTimer = null;
+  }
+
+  // Persistent layer: stains deposited here STAY on the page after the eruption.
+  let stainLayer = null;
+  function ensureStainLayer() {
+    if (stainLayer && document.body.contains(stainLayer)) return stainLayer;
+    stainLayer = document.createElement('div');
+    stainLayer.className = 'slime-stain-layer';
+    stainLayer.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(stainLayer);
+    return stainLayer;
+  }
+
+  // Cap total stains so repeated 33-releases never grow the DOM without bound;
+  // oldest stains dissolve away as fresh ones land.
+  const STAIN_CAP = innerWidth <= 640 ? 34 : 72;
+  function trimStains(layer) {
+    const nodes = layer.children;
+    while (nodes.length > STAIN_CAP) layer.removeChild(nodes[0]);
+  }
+
+  function spawnStain(layer, isSmall) {
+    const stain = document.createElement('span');
+    stain.className = 'slime-stain is-settling';
+    const size = isSmall ? rand(34, 130) : rand(46, 200);
+    const borderRadii = [
+      '58% 42% 55% 45% / 52% 56% 44% 48%',
+      '46% 54% 60% 40% / 58% 42% 58% 42%',
+      '63% 37% 41% 59% / 47% 63% 37% 53%',
+      '50% 50% 48% 52% / 60% 40% 64% 36%',
+    ];
+    stain.style.setProperty('--x', String(rand(2, 98)));
+    stain.style.setProperty('--y', String(rand(2, 98)));
+    stain.style.setProperty('--s', `${size}px`);
+    stain.style.setProperty('--r', `${rand(-22, 22)}deg`);
+    stain.style.setProperty('--br', borderRadii[Math.floor(rand(0, borderRadii.length))]);
+    layer.appendChild(stain);
+    trimStains(layer);
+  }
+
+  function spawnTopDrip(layer, isSmall) {
+    const drip = document.createElement('span');
+    drip.className = 'slime-drip';
+    const w = isSmall ? rand(14, 30) : rand(18, 42);
+    drip.style.setProperty('--x', String(rand(1, 99)));
+    drip.style.setProperty('--w', `${w}px`);
+    drip.style.setProperty('--h', `${isSmall ? rand(70, 190) : rand(110, 300)}px`);
+    drip.style.setProperty('--d', `${rand(1.1, 2.0)}s`);
+    layer.appendChild(drip);
+    trimStains(layer);
+  }
+
+  function spawnBlobWave(blast, isSmall, reduced) {
+    const perWave = reduced ? 3 : (isSmall ? 6 : 11);
+    for (let i = 0; i < perWave; i++) {
+      const blob = document.createElement('span');
+      blob.className = 'hyper-blast__blob';
+      blob.style.setProperty('--x', String(rand(-6, 100)));
+      blob.style.setProperty('--s', `${rand(42, isSmall ? 130 : 210)}px`);
+      const dur = rand(1.45, 2.35);
+      blob.style.setProperty('--d', `${dur}s`);
+      blob.style.setProperty('--delay', `${rand(0, 0.32)}s`);
+      blob.style.setProperty('--r', `${rand(-28, 28)}deg`);
+      blast.appendChild(blob);
+      // Recycle each blob once it has fallen off-screen.
+      window.setTimeout(() => blob.remove(), (dur + 0.4) * 1000);
+    }
+  }
 
   function triggerHyperBlast() {
     document.querySelectorAll('.hyper-blast').forEach((node) => node.remove());
-    window.clearTimeout(hyperBlastTimer);
+    clearHyperBlastTimers();
+
+    const reduced = prefersReducedMotion.matches;
+    const isSmall = innerWidth <= 640;
+    const layer = ensureStainLayer();
 
     const blast = document.createElement('div');
     blast.className = 'hyper-blast';
@@ -835,31 +939,133 @@
     foam.className = 'hyper-blast__foam';
     blast.appendChild(foam);
 
-    const blobCount = innerWidth <= 640 ? 16 : 28;
-    for (let i = 0; i < blobCount; i++) {
-      const blob = document.createElement('span');
-      blob.className = 'hyper-blast__blob';
-      blob.style.setProperty('--x', String(rand(-6, 100)));
-      blob.style.setProperty('--s', `${rand(42, innerWidth <= 640 ? 130 : 210)}px`);
-      blob.style.setProperty('--d', `${rand(1.45, 2.35)}s`);
-      blob.style.setProperty('--delay', `${rand(0, 0.42)}s`);
-      blob.style.setProperty('--r', `${rand(-28, 28)}deg`);
-      blast.appendChild(blob);
-    }
-
     document.body.appendChild(blast);
     document.body.classList.add('is-hyper-blasting');
-    playHyperOrgasmOnce();
 
-    if ('vibrate' in navigator) {
-      try { navigator.vibrate([60, 40, 90, 40, 140]); } catch (_) {}
+    // Big opening burst of stains so the page is splattered instantly.
+    const openingStains = reduced ? 6 : (isSmall ? 12 : 20);
+    for (let i = 0; i < openingStains; i++) spawnStain(layer, isSmall);
+    const openingDrips = reduced ? 3 : (isSmall ? 5 : 9);
+    for (let i = 0; i < openingDrips; i++) spawnTopDrip(layer, isSmall);
+
+    if (!reduced) {
+      // Continuous raining blobs for the full duration.
+      spawnBlobWave(blast, isSmall, reduced);
+      hyperBlastTimers.push(window.setInterval(() => spawnBlobWave(blast, isSmall, reduced), isSmall ? 380 : 300));
+      // Keep splattering fresh stains + edge drips the whole time.
+      hyperBlastTimers.push(window.setInterval(() => {
+        spawnStain(layer, isSmall);
+        if (Math.random() < 0.5) spawnStain(layer, isSmall);
+        if (Math.random() < 0.35) spawnTopDrip(layer, isSmall);
+      }, isSmall ? 320 : 230));
     }
 
-    hyperBlastTimer = window.setTimeout(() => {
+    // Loop the slime sound across the whole 10s window.
+    playHyperOnce();
+    hyperBlastSoundTimer = window.setInterval(() => playHyperOnce(), 1600);
+    hyperBlastTimers.push(hyperBlastSoundTimer);
+
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate([60, 40, 90, 40, 140, 40, 90, 40, 160]); } catch (_) {}
+    }
+
+    // End of eruption: stop emitting, fade the active overlay, leave stains behind.
+    hyperBlastTimers.push(window.setTimeout(() => {
+      clearHyperBlastTimers();
       document.body.classList.remove('is-hyper-blasting');
-      blast.remove();
-    }, 3600);
+      blast.style.transition = 'opacity 0.6s ease';
+      blast.style.opacity = '0';
+      window.setTimeout(() => blast.remove(), 650);
+      // Final farewell splatter so it "drips out" right at the end.
+      const finale = isSmall ? 4 : 7;
+      for (let i = 0; i < finale; i++) spawnStain(layer, isSmall);
+      // Nudge the user to clean up.
+      if (stainsPresent()) showToast(isSmall ? 'WIPE THE SLIME TO CLEAN 🧽' : 'CLICK + DRAG TO WIPE THE SLIME 🧽');
+    }, HYPER_BLAST_DURATION));
   }
+
+  /* ---------- Slime cleaning: wipe stains away with finger / click-drag ---------- */
+  let wipeArmed = false;
+  let lastWipeX = 0;
+  let lastWipeY = 0;
+  let wipeSoundAt = 0;
+  let smearFxLayer = null;
+
+  function stainsPresent() {
+    return !!(stainLayer && stainLayer.children.length > 0);
+  }
+
+  function ensureSmearLayer() {
+    if (smearFxLayer && document.body.contains(smearFxLayer)) return smearFxLayer;
+    smearFxLayer = document.createElement('div');
+    smearFxLayer.className = 'slime-smear-layer';
+    smearFxLayer.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(smearFxLayer);
+    return smearFxLayer;
+  }
+
+  function wipeStainNode(node) {
+    if (node.classList.contains('is-wiped')) return;
+    node.classList.add('is-wiped');
+    const now = performance.now();
+    if (now - wipeSoundAt > 110) {
+      wipeSoundAt = now;
+      try { playSlimeStacked(); } catch (_) {}
+    }
+    window.setTimeout(() => node.remove(), 300);
+  }
+
+  function spawnSmear(x, y) {
+    if (prefersReducedMotion.matches) return;
+    const layer = ensureSmearLayer();
+    const smear = document.createElement('span');
+    smear.className = 'slime-smear';
+    smear.style.left = `${x}px`;
+    smear.style.top = `${y}px`;
+    smear.style.setProperty('--r', `${rand(-40, 40)}deg`);
+    layer.appendChild(smear);
+    window.setTimeout(() => smear.remove(), 460);
+  }
+
+  function wipeAt(x, y) {
+    if (!stainsPresent()) return;
+    const pad = innerWidth <= 640 ? 44 : 58; // finger / cursor reach
+    let wiped = false;
+    for (const node of Array.from(stainLayer.children)) {
+      if (node.classList.contains('is-wiped')) continue;
+      const r = node.getBoundingClientRect();
+      if (x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad) {
+        wipeStainNode(node);
+        wiped = true;
+      }
+    }
+    if (wiped) spawnSmear(x, y);
+  }
+
+  window.addEventListener('pointerdown', (e) => {
+    if (!stainsPresent()) return;
+    wipeArmed = true;
+    lastWipeX = e.clientX;
+    lastWipeY = e.clientY;
+    wipeAt(e.clientX, e.clientY);
+  }, { passive: true });
+
+  window.addEventListener('pointermove', (e) => {
+    if (!wipeArmed || !stainsPresent()) return;
+    // Interpolate along the drag so fast swipes don't skip stains.
+    const dist = Math.hypot(e.clientX - lastWipeX, e.clientY - lastWipeY);
+    const steps = Math.max(1, Math.floor(dist / 22));
+    for (let i = 1; i <= steps; i++) {
+      const t = i / steps;
+      wipeAt(lastWipeX + (e.clientX - lastWipeX) * t, lastWipeY + (e.clientY - lastWipeY) * t);
+    }
+    lastWipeX = e.clientX;
+    lastWipeY = e.clientY;
+  }, { passive: true });
+
+  function disarmWipe() { wipeArmed = false; }
+  window.addEventListener('pointerup', disarmWipe, { passive: true });
+  window.addEventListener('pointercancel', disarmWipe, { passive: true });
 
   function bumpCounter() {
     const optimisticCount = count + 1;
