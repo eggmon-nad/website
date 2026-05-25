@@ -3827,16 +3827,19 @@ a {
   font-size: clamp(30px, 5.5vw, 54px);
   line-height: 0.92;
   color: var(--text);
-  -webkit-text-stroke: 0;
-  paint-order: normal;
-  text-shadow: none;
+  -webkit-text-stroke: 0 !important;
+  paint-order: normal !important;
+  text-shadow: none !important;
   margin-bottom: 12px;
 }
 .retention-card__intro,
 .retention-card__note {
   position: relative;
   z-index: 1;
-  font-size: 13px;
+  font-family: var(--ui-font);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-size: 13px !important;
   line-height: 1.45;
 }
 .retention-card__stats {
@@ -3858,8 +3861,12 @@ a {
 .retention-card__stats span {
   display: block;
   color: var(--magenta);
-  font-size: clamp(16px, 2.15vw, 20px);
-  margin-bottom: 4px;
+  font-family: var(--ui-font);
+  font-weight: 900;
+  letter-spacing: -0.015em;
+  font-size: clamp(18px, 2.5vw, 24px);
+  line-height: 1;
+  margin-bottom: 6px;
 }
 .retention-card__stats strong {
   display: block;
@@ -3913,11 +3920,14 @@ a {
 .retention-list__row:nth-child(odd) { transform: rotate(0.2deg); }
 .retention-list__row:nth-child(even) { transform: rotate(-0.2deg); }
 .retention-list__rank {
-  min-width: 48px;
+  min-width: 56px;
   color: var(--magenta);
+  font-family: var(--ui-font);
+  font-weight: 950;
+  font-size: clamp(30px, 4vw, 38px);
+  line-height: 1;
   -webkit-text-stroke: 0.35px var(--white);
   paint-order: stroke fill;
-  font-size: clamp(24px, 3vw, 30px);
 }
 .retention-list__wallet {
   min-width: 0;
@@ -3941,7 +3951,10 @@ a {
   text-align: center;
 }
 .retention-card__note {
-  font-size: 13px;
+  font-family: var(--ui-font);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  font-size: 13px !important;
   line-height: 1.45;
   opacity: 0.88;
 }
