@@ -166,3 +166,43 @@ MONAD_RPC_URL=<your Monad mainnet RPC URL>
 ```
 
 `MONAD_RPC_URL` is optional because the API defaults to `https://rpc.monad.xyz`, but a dedicated RPC is better for reliability. `EGGMON_LOCK_DEPLOY_BLOCK` is required so the API scans only from the lock deployment onward.
+
+### Smooth leaderboard cache
+
+The retention API uses a persistent checkpoint so it does **not** rescan from deployment forever.
+
+Recommended setup: connect **Vercel KV** to the project, or use the same Upstash Redis REST database already used by the click counter.
+
+The API accepts either Vercel KV env names:
+
+```txt
+KV_REST_API_URL=<auto-added by Vercel KV>
+KV_REST_API_TOKEN=<auto-added by Vercel KV>
+```
+
+or Upstash env names:
+
+```txt
+UPSTASH_REDIS_REST_URL=<your Upstash HTTPS REST URL>
+UPSTASH_REDIS_REST_TOKEN=<your Upstash REST token>
+```
+
+Keep these leaderboard env vars too:
+
+```txt
+EGGMON_LOCK_ADDRESS=0x8D7d6619C5a4a9332dB59641D15a659289418343
+EGGMON_LOCK_DEPLOY_BLOCK=76976229
+MONAD_RPC_URL=https://rpc1.monad.xyz
+EGGMON_LOG_BATCH_SIZE=25
+EGGMON_MAX_SCAN_BLOCKS_PER_REQUEST=2500
+EGGMON_RETENTION_CACHE_MS=30000
+```
+
+How it works:
+
+1. First request scans from deployment block.
+2. The API saves wallet totals and `lastScannedBlock` in KV/Redis.
+3. Later requests scan only new blocks.
+4. If the RPC has a temporary issue, the site keeps showing the last known good leaderboard instead of breaking.
+
+If KV/Redis is not configured, `/api/retention` still works, but it falls back to the old stateless behavior and may get slower as the chain grows.

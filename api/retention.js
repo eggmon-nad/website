@@ -1,15 +1,25 @@
 // EGGMON CUM RETENTION leaderboard for Vercel.
-// Reads EGGMON Transfer events where `to` is the lock contract and sums deposits by sender.
+// Smooth mode: uses Vercel KV / Upstash Redis REST as a persistent checkpoint.
+// It reads EGGMON Transfer events where `to` is the lock contract and stores cumulative totals.
+//
 // Required env:
 // - EGGMON_LOCK_ADDRESS: deployed EGGMONTimeLock contract address
-// Required env:
 // - EGGMON_LOCK_DEPLOY_BLOCK: block number where the lock contract was deployed
+//
+// Strongly recommended env for smooth mode:
+// - KV_REST_API_URL + KV_REST_API_TOKEN
+//   or
+// - UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN
+//
 // Optional env:
 // - MONAD_RPC_URL: your Monad mainnet RPC URL. Defaults to https://rpc.monad.xyz
 // - EGGMON_RETENTION_LIMIT: leaderboard rows to return. Defaults to 25
 // - EGGMON_LOG_BATCH_SIZE: eth_getLogs batch size. Defaults to 25 blocks
-// - EGGMON_RETENTION_CACHE_MS: in-memory serverless cache TTL. Defaults to 30000 ms
 // - EGGMON_LOG_RETRY_DELAY_MS: delay between RPC retries. Defaults to 500 ms
+// - EGGMON_RETENTION_CACHE_MS: in-memory serverless cache TTL. Defaults to 30000 ms
+// - EGGMON_MAX_SCAN_BLOCKS_PER_REQUEST: max new blocks scanned per request. Defaults to 2500
+// - EGGMON_CONFIRMATION_BLOCKS: blocks to wait before indexing. Defaults to 0
+// - EGGMON_RETENTION_STATE_KEY: optional custom Redis key
 
 const EGGMON_TOKEN = '0xD10cf12099f5Fb424Bc77401DF49f0c785657777';
 const TOKEN_DECIMALS = 18;
@@ -17,6 +27,7 @@ const DEFAULT_RPC_URL = 'https://rpc.monad.xyz';
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
 const BALANCE_OF_SELECTOR = '0x70a08231';
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+const STATE_VERSION = 2;
 
 let memoryCache = null;
 
@@ -102,6 +113,96 @@ function formatUnits(value, decimals = 18, maxFractionDigits = 2) {
   const wholeText = whole.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   const sign = negative ? '-' : '';
   return fractionText ? `${sign}${wholeText}.${fractionText}` : `${sign}${wholeText}`;
+}
+
+function getKvConfig() {
+  const url = String(
+    process.env.KV_REST_API_URL ||
+    process.env.UPSTASH_REDIS_REST_URL ||
+    ''
+  ).trim();
+
+  const token = String(
+    process.env.KV_REST_API_TOKEN ||
+    process.env.UPSTASH_REDIS_REST_TOKEN ||
+    ''
+  ).trim();
+
+  if (!url || !token) return null;
+
+  return {
+    url: url.replace(/\/+$/, ''),
+    token,
+  };
+}
+
+function getStateKey(lockAddress) {
+  const customKey = String(process.env.EGGMON_RETENTION_STATE_KEY || '').trim();
+  if (customKey) return customKey;
+
+  const cleanLock = normalizeAddress(lockAddress) || 'unknown-lock';
+  return `eggmon:retention:v${STATE_VERSION}:${cleanLock}`;
+}
+
+async function kvCommand(command) {
+  const config = getKvConfig();
+  if (!config) return { configured: false, result: null };
+
+  const response = await fetch(config.url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${config.token}`,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+    body: JSON.stringify(command),
+  });
+
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (_) {
+    throw new Error(`KV returned non-JSON response: ${text.slice(0, 120)}`);
+  }
+
+  if (!response.ok || data.error) {
+    const message = data.error || data.message || `KV request failed with status ${response.status}`;
+    throw new Error(String(message));
+  }
+
+  return { configured: true, result: data.result };
+}
+
+async function loadPersistentState(lockAddress, deployBlock) {
+  const key = getStateKey(lockAddress);
+  const { configured, result } = await kvCommand(['GET', key]);
+
+  if (!configured) return { configured: false, key, state: null };
+  if (!result) return { configured: true, key, state: null };
+
+  let state = null;
+  try {
+    state = typeof result === 'string' ? JSON.parse(result) : result;
+  } catch (_) {
+    return { configured: true, key, state: null };
+  }
+
+  if (!state || state.version !== STATE_VERSION) return { configured: true, key, state: null };
+  if (normalizeAddress(state.lockContract) !== normalizeAddress(lockAddress)) return { configured: true, key, state: null };
+  if (normalizeAddress(state.token) !== normalizeAddress(EGGMON_TOKEN)) return { configured: true, key, state: null };
+  if (String(state.deployBlock) !== String(deployBlock)) return { configured: true, key, state: null };
+  if (!state.totals || typeof state.totals !== 'object') state.totals = {};
+  if (!state.lastScannedBlock) state.lastScannedBlock = (BigInt(deployBlock) - 1n).toString();
+  if (!state.totalLogCount) state.totalLogCount = '0';
+
+  return { configured: true, key, state };
+}
+
+async function savePersistentState(key, state) {
+  const payload = JSON.stringify(state);
+  const { configured } = await kvCommand(['SET', key, payload]);
+  return configured;
 }
 
 async function rpcCall(rpcUrl, method, params) {
@@ -197,6 +298,114 @@ async function getLogsInBatches(rpcUrl, lockAddress, fromBlock, toBlock, batchSi
   return logs;
 }
 
+function makeInitialState(lockAddress, deployBlock) {
+  return {
+    version: STATE_VERSION,
+    token: displayAddress(EGGMON_TOKEN),
+    lockContract: displayAddress(lockAddress),
+    deployBlock: String(deployBlock),
+    lastScannedBlock: (BigInt(deployBlock) - 1n).toString(),
+    totalLogCount: '0',
+    totals: {},
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function applyLogsToState(state, logs) {
+  let newTotal = BigInt(state.totalLogCount || 0);
+
+  for (const log of logs) {
+    if (!Array.isArray(log.topics) || log.topics.length < 3) continue;
+    const from = addressFromTopic(log.topics[1]);
+    if (!from || from === ZERO_ADDRESS) continue;
+
+    const amount = parseHexBigInt(log.data);
+    if (amount <= 0n) continue;
+
+    const previous = BigInt(state.totals[from] || '0');
+    state.totals[from] = (previous + amount).toString();
+    newTotal += 1n;
+  }
+
+  state.totalLogCount = newTotal.toString();
+  state.updatedAt = new Date().toISOString();
+}
+
+function buildRowsFromTotals(totals, limit) {
+  const entries = Object.entries(totals || {})
+    .map(([address, raw]) => [displayAddress(address), BigInt(raw || '0')])
+    .filter(([address, amount]) => Boolean(address) && amount > 0n);
+
+  return entries
+    .sort((a, b) => (a[1] === b[1] ? a[0].localeCompare(b[0]) : a[1] > b[1] ? -1 : 1))
+    .slice(0, limit)
+    .map(([address, amount], index) => ({
+      rank: index + 1,
+      address: displayAddress(address),
+      raw: amount.toString(),
+      formatted: formatUnits(amount, TOKEN_DECIMALS, 2),
+    }));
+}
+
+function totalFromState(state) {
+  return Object.values(state.totals || {}).reduce((sum, raw) => sum + BigInt(raw || '0'), 0n);
+}
+
+function payloadFromState({
+  state,
+  lockedBalance,
+  latestBlock,
+  targetBlock,
+  scannedFrom,
+  scannedTo,
+  scannedLogCount,
+  limit,
+  cacheMode,
+  kvConfigured,
+  stateKey,
+  stale = false,
+  syncError = '',
+}) {
+  const totalDeposited = totalFromState(state);
+  const rows = buildRowsFromTotals(state.totals, limit);
+  const lastScannedBlock = parseBlockNumber(state.lastScannedBlock, parseBlockNumber(state.deployBlock, 0n) - 1n);
+  const target = BigInt(targetBlock);
+  const catchingUp = lastScannedBlock < target;
+
+  return {
+    ok: true,
+    token: EGGMON_TOKEN,
+    lockContract: displayAddress(state.lockContract),
+    fromBlock: String(state.deployBlock),
+    toBlock: lastScannedBlock.toString(),
+    latestBlock: BigInt(latestBlock).toString(),
+    targetBlock: target.toString(),
+    lastScannedBlock: lastScannedBlock.toString(),
+    catchingUp,
+    syncing: catchingUp,
+    scannedBlocksThisRequest: scannedFrom && scannedTo && scannedTo >= scannedFrom
+      ? (scannedTo - scannedFrom + 1n).toString()
+      : '0',
+    scannedFromBlockThisRequest: scannedFrom ? scannedFrom.toString() : '',
+    scannedToBlockThisRequest: scannedTo ? scannedTo.toString() : '',
+    scannedLogsThisRequest: scannedLogCount,
+    logCount: Number(state.totalLogCount || 0),
+    uniqueWallets: Object.keys(state.totals || {}).length,
+    totalRaw: totalDeposited.toString(),
+    totalFormatted: formatUnits(totalDeposited, TOKEN_DECIMALS, 2),
+    lockedBalanceRaw: lockedBalance.toString(),
+    lockedBalanceFormatted: formatUnits(lockedBalance, TOKEN_DECIMALS, 2),
+    leaderboard: rows,
+    cacheMode,
+    kvConfigured,
+    stateKey,
+    stale,
+    syncError,
+    updatedAt: state.updatedAt || new Date().toISOString(),
+  };
+}
+
 async function buildLeaderboard() {
   const lockAddress = normalizeAddress(process.env.EGGMON_LOCK_ADDRESS);
   if (!lockAddress) {
@@ -219,55 +428,74 @@ async function buildLeaderboard() {
   }
 
   const latestBlock = parseHexBigInt(await rpcCall(rpcUrl, 'eth_blockNumber', []));
-  const fromBlock = parseBlockNumber(process.env.EGGMON_LOCK_DEPLOY_BLOCK, 0n);
-  const safeFromBlock = fromBlock > latestBlock ? latestBlock : fromBlock;
+  const deployBlock = parseBlockNumber(process.env.EGGMON_LOCK_DEPLOY_BLOCK, 0n);
+  const confirmationBlocks = BigInt(parsePositiveInt(process.env.EGGMON_CONFIRMATION_BLOCKS, 0, 0, 1000));
+  const targetBlock = latestBlock > confirmationBlocks ? latestBlock - confirmationBlocks : latestBlock;
+  const safeTargetBlock = targetBlock < deployBlock ? deployBlock - 1n : targetBlock;
+
   const batchSize = parsePositiveInt(process.env.EGGMON_LOG_BATCH_SIZE, 25, 1, 20000);
   const limit = parsePositiveInt(process.env.EGGMON_RETENTION_LIMIT, 25, 1, 100);
+  const maxScanBlocks = BigInt(parsePositiveInt(process.env.EGGMON_MAX_SCAN_BLOCKS_PER_REQUEST, 2500, 1, 100000));
 
-  const logs = await getLogsInBatches(rpcUrl, lockAddress, safeFromBlock, latestBlock, batchSize);
-  const lockedBalance = await getLockedBalance(rpcUrl, lockAddress);
+  const persistent = await loadPersistentState(lockAddress, deployBlock.toString());
 
-  const totals = new Map();
-  let totalDeposited = 0n;
+  // If KV/Upstash is not configured, keep the old stateless behavior as a fallback.
+  if (!persistent.configured) {
+    const state = makeInitialState(lockAddress, deployBlock.toString());
+    const logs = safeTargetBlock >= deployBlock
+      ? await getLogsInBatches(rpcUrl, lockAddress, deployBlock, safeTargetBlock, batchSize)
+      : [];
 
-  for (const log of logs) {
-    if (!Array.isArray(log.topics) || log.topics.length < 3) continue;
-    const from = addressFromTopic(log.topics[1]);
-    if (!from || from === ZERO_ADDRESS) continue;
+    applyLogsToState(state, logs);
+    state.lastScannedBlock = safeTargetBlock.toString();
 
-    const amount = parseHexBigInt(log.data);
-    if (amount <= 0n) continue;
+    const lockedBalance = await getLockedBalance(rpcUrl, lockAddress);
 
-    totals.set(from, (totals.get(from) || 0n) + amount);
-    totalDeposited += amount;
+    return payloadFromState({
+      state,
+      lockedBalance,
+      latestBlock,
+      targetBlock: safeTargetBlock,
+      scannedFrom: deployBlock,
+      scannedTo: safeTargetBlock,
+      scannedLogCount: logs.length,
+      limit,
+      cacheMode: 'memory_only_no_kv',
+      kvConfigured: false,
+      stateKey: persistent.key,
+    });
   }
 
-  const rows = Array.from(totals.entries())
-    .sort((a, b) => (a[1] === b[1] ? a[0].localeCompare(b[0]) : a[1] > b[1] ? -1 : 1))
-    .slice(0, limit)
-    .map(([address, amount], index) => ({
-      rank: index + 1,
-      address: displayAddress(address),
-      raw: amount.toString(),
-      formatted: formatUnits(amount, TOKEN_DECIMALS, 2),
-    }));
+  const state = persistent.state || makeInitialState(lockAddress, deployBlock.toString());
+  const previousLastScannedBlock = parseBlockNumber(state.lastScannedBlock, deployBlock - 1n);
+  const scanFrom = previousLastScannedBlock + 1n;
+  const scanTo = scanFrom <= safeTargetBlock
+    ? (scanFrom + maxScanBlocks - 1n > safeTargetBlock ? safeTargetBlock : scanFrom + maxScanBlocks - 1n)
+    : previousLastScannedBlock;
 
-  return {
-    ok: true,
-    token: EGGMON_TOKEN,
-    lockContract: displayAddress(lockAddress),
-    fromBlock: safeFromBlock.toString(),
-    toBlock: latestBlock.toString(),
-    scannedBlocks: (latestBlock - safeFromBlock + 1n).toString(),
-    logCount: logs.length,
-    uniqueWallets: totals.size,
-    totalRaw: totalDeposited.toString(),
-    totalFormatted: formatUnits(totalDeposited, TOKEN_DECIMALS, 2),
-    lockedBalanceRaw: lockedBalance.toString(),
-    lockedBalanceFormatted: formatUnits(lockedBalance, TOKEN_DECIMALS, 2),
-    leaderboard: rows,
-    updatedAt: new Date().toISOString(),
-  };
+  let logs = [];
+  if (scanFrom <= scanTo) {
+    logs = await getLogsInBatches(rpcUrl, lockAddress, scanFrom, scanTo, batchSize);
+    applyLogsToState(state, logs);
+    state.lastScannedBlock = scanTo.toString();
+    await savePersistentState(persistent.key, state);
+  }
+
+  const lockedBalance = await getLockedBalance(rpcUrl, lockAddress);
+
+  return payloadFromState({
+    state,
+    lockedBalance,
+    latestBlock,
+    targetBlock: safeTargetBlock,
+    scannedFrom: scanFrom <= scanTo ? scanFrom : null,
+    scannedTo: scanFrom <= scanTo ? scanTo : null,
+    scannedLogCount: logs.length,
+    limit,
+    cacheMode: 'persistent_kv_incremental',
+    kvConfigured: true,
+    stateKey: persistent.key,
+  });
 }
 
 module.exports = async function handler(req, res) {
@@ -297,6 +525,18 @@ module.exports = async function handler(req, res) {
     sendJson(res, 200, { ...payload, cached: false }, Math.ceil(cacheMs / 1000));
   } catch (error) {
     console.error('[EGGMON retention]', error);
+
+    // Smooth failure mode: keep showing the last known good leaderboard instead of breaking the page.
+    if (memoryCache?.payload) {
+      sendJson(res, 200, {
+        ...memoryCache.payload,
+        cached: true,
+        stale: true,
+        syncError: error.message,
+      }, Math.ceil(Math.max(cacheMs, 30000) / 1000));
+      return;
+    }
+
     const status = error.code === 'LOCK_NOT_CONFIGURED' || error.code === 'DEPLOY_BLOCK_NOT_CONFIGURED' || error.code === 'BAD_RPC_URL' ? 500 : 502;
     sendJson(res, status, {
       ok: false,

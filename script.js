@@ -718,7 +718,7 @@
         throw err;
       }
 
-      setRetentionStatus(data.cached ? 'Cached' : 'Live', 'live');
+      setRetentionStatus(data.stale ? 'Cached' : data.syncing ? 'Syncing' : data.cached ? 'Cached' : 'Live', 'live');
       if (retentionEls.total) retentionEls.total.textContent = `${data.lockedBalanceFormatted || data.totalFormatted || '--'} $EGG`;
       if (retentionEls.wallets) retentionEls.wallets.textContent = Number(data.uniqueWallets || 0).toLocaleString();
       setRetentionLockAddress(data.lockContract);
