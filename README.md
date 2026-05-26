@@ -206,3 +206,32 @@ How it works:
 4. If the RPC has a temporary issue, the site keeps showing the last known good leaderboard instead of breaking.
 
 If KV/Redis is not configured, `/api/retention` still works, but it falls back to the old stateless behavior and may get slower as the chain grows.
+
+## EGGMON retention cron
+
+The leaderboard uses a persistent Upstash/Vercel KV checkpoint. To keep it warm, this repo includes a Vercel Cron job:
+
+```json
+{
+  "path": "/api/retention-cron",
+  "schedule": "* * * * *"
+}
+```
+
+The cron endpoint calls `/api/retention` with `sync=1`, which bypasses the short in-memory cache and scans the next chunk of blocks into KV. Normal visitors still get the cached fast response.
+
+Recommended production env vars:
+
+```txt
+EGGMON_RETENTION_CACHE_MS=30000
+EGGMON_LOG_BATCH_SIZE=25
+EGGMON_MAX_SCAN_BLOCKS_PER_REQUEST=2500
+EGGMON_SYNC_LOCK_TTL_MS=25000
+```
+
+If Vercel rejects the `* * * * *` schedule on your plan, use an external cron service to ping:
+
+```txt
+https://eggmon.fun/api/retention-cron
+```
+

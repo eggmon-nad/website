@@ -20,6 +20,7 @@
 // - EGGMON_MAX_SCAN_BLOCKS_PER_REQUEST: max new blocks scanned per request. Defaults to 2500
 // - EGGMON_CONFIRMATION_BLOCKS: blocks to wait before indexing. Defaults to 0
 // - EGGMON_RETENTION_STATE_KEY: optional custom Redis key
+// - EGGMON_SYNC_LOCK_TTL_MS: Redis lock TTL for sync jobs. Defaults to 25000 ms
 
 const EGGMON_TOKEN = '0xD10cf12099f5Fb424Bc77401DF49f0c785657777';
 const TOKEN_DECIMALS = 18;
@@ -90,6 +91,28 @@ function parsePositiveInt(value, fallback, min, max) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getRequestParam(req, name) {
+  try {
+    const url = new URL(req.url || '', 'http://localhost');
+    return url.searchParams.get(name) || '';
+  } catch (_) {
+    return '';
+  }
+}
+
+function isTruthyParam(value) {
+  const clean = String(value || '').trim().toLowerCase();
+  return clean === '1' || clean === 'true' || clean === 'yes' || clean === 'cron';
+}
+
+function shouldForceSync(req) {
+  return (
+    isTruthyParam(getRequestParam(req, 'sync')) ||
+    isTruthyParam(getRequestParam(req, 'force')) ||
+    isTruthyParam(getRequestParam(req, 'cron'))
+  );
 }
 
 function parseHexBigInt(value) {
@@ -203,6 +226,36 @@ async function savePersistentState(key, state) {
   const payload = JSON.stringify(state);
   const { configured } = await kvCommand(['SET', key, payload]);
   return configured;
+}
+
+async function acquireSyncLock(lockKey) {
+  const token = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  const ttlMs = parsePositiveInt(process.env.EGGMON_SYNC_LOCK_TTL_MS, 25000, 5000, 120000);
+
+  const { configured, result } = await kvCommand(['SET', lockKey, token, 'PX', String(ttlMs), 'NX']);
+
+  if (!configured) {
+    return { configured: false, acquired: true, key: lockKey, token };
+  }
+
+  return {
+    configured: true,
+    acquired: result === 'OK',
+    key: lockKey,
+    token,
+  };
+}
+
+async function releaseSyncLock(lock) {
+  if (!lock?.configured || !lock?.acquired) return;
+
+  const script = "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end";
+
+  try {
+    await kvCommand(['EVAL', script, '1', lock.key, lock.token]);
+  } catch (error) {
+    console.warn('[EGGMON retention] failed to release sync lock', error?.message || error);
+  }
 }
 
 async function rpcCall(rpcUrl, method, params) {
@@ -474,11 +527,27 @@ async function buildLeaderboard() {
     : previousLastScannedBlock;
 
   let logs = [];
+  let syncError = '';
+  let scannedFromForPayload = null;
+  let scannedToForPayload = null;
+
   if (scanFrom <= scanTo) {
-    logs = await getLogsInBatches(rpcUrl, lockAddress, scanFrom, scanTo, batchSize);
-    applyLogsToState(state, logs);
-    state.lastScannedBlock = scanTo.toString();
-    await savePersistentState(persistent.key, state);
+    const syncLock = await acquireSyncLock(`${persistent.key}:sync-lock`);
+
+    if (!syncLock.acquired) {
+      syncError = 'Sync already running; returned latest saved leaderboard state.';
+    } else {
+      try {
+        logs = await getLogsInBatches(rpcUrl, lockAddress, scanFrom, scanTo, batchSize);
+        applyLogsToState(state, logs);
+        state.lastScannedBlock = scanTo.toString();
+        await savePersistentState(persistent.key, state);
+        scannedFromForPayload = scanFrom;
+        scannedToForPayload = scanTo;
+      } finally {
+        await releaseSyncLock(syncLock);
+      }
+    }
   }
 
   const lockedBalance = await getLockedBalance(rpcUrl, lockAddress);
@@ -488,13 +557,14 @@ async function buildLeaderboard() {
     lockedBalance,
     latestBlock,
     targetBlock: safeTargetBlock,
-    scannedFrom: scanFrom <= scanTo ? scanFrom : null,
-    scannedTo: scanFrom <= scanTo ? scanTo : null,
+    scannedFrom: scannedFromForPayload,
+    scannedTo: scannedToForPayload,
     scannedLogCount: logs.length,
     limit,
     cacheMode: 'persistent_kv_incremental',
     kvConfigured: true,
     stateKey: persistent.key,
+    syncError,
   });
 }
 
@@ -512,17 +582,18 @@ module.exports = async function handler(req, res) {
   }
 
   const cacheMs = parsePositiveInt(process.env.EGGMON_RETENTION_CACHE_MS, 30000, 0, 300000);
+  const forceSync = shouldForceSync(req);
   const now = Date.now();
 
-  if (memoryCache && cacheMs > 0 && now - memoryCache.createdAt < cacheMs) {
-    sendJson(res, 200, { ...memoryCache.payload, cached: true }, Math.ceil(cacheMs / 1000));
+  if (!forceSync && memoryCache && cacheMs > 0 && now - memoryCache.createdAt < cacheMs) {
+    sendJson(res, 200, { ...memoryCache.payload, cached: true, forceSync: false }, Math.ceil(cacheMs / 1000));
     return;
   }
 
   try {
     const payload = await buildLeaderboard();
     memoryCache = { createdAt: now, payload };
-    sendJson(res, 200, { ...payload, cached: false }, Math.ceil(cacheMs / 1000));
+    sendJson(res, 200, { ...payload, cached: false, forceSync }, Math.ceil(cacheMs / 1000));
   } catch (error) {
     console.error('[EGGMON retention]', error);
 
@@ -532,6 +603,7 @@ module.exports = async function handler(req, res) {
         ...memoryCache.payload,
         cached: true,
         stale: true,
+        forceSync,
         syncError: error.message,
       }, Math.ceil(Math.max(cacheMs, 30000) / 1000));
       return;

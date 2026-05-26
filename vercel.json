@@ -10,5 +10,12 @@
         }
       ]
     }
+  ],
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/retention-cron",
+      "schedule": "* * * * *"
+    }
   ]
 }
