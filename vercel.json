@@ -2,7 +2,7 @@
   "version": 2,
   "crons": [
     {
-      "path": "/api/retention?sync=1&cron=1",
+      "path": "/api/cron",
       "schedule": "* * * * *"
     }
   ]
