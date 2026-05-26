@@ -1,20 +1,8 @@
 {
   "version": 2,
-  "headers": [
-    {
-      "source": "/api/(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-store, no-cache, must-revalidate, proxy-revalidate"
-        }
-      ]
-    }
-  ],
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
     {
-      "path": "/api/retention-cron",
+      "path": "/api/retention?sync=1&cron=1",
       "schedule": "* * * * *"
     }
   ]
