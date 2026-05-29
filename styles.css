@@ -625,6 +625,7 @@ body::after {
 .chunk-btn--dex,
 .chunk-btn--share,
 .chunk-btn--gecko,
+.chunk-btn--coingecko,
 .chunk-btn--info {
   background: var(--white);
   color: var(--text);
@@ -632,6 +633,32 @@ body::after {
 }
 .chunk-btn:hover  { transform: rotate(0) scale(1.05); box-shadow: 9px 9px 0 var(--black); }
 .chunk-btn:active { transform: rotate(0) scale(0.98); box-shadow: 2px 2px 0 var(--black); }
+
+.gecko-duo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  min-width: 0;
+  transform: rotate(1deg);
+}
+.gecko-duo__button {
+  width: 100%;
+  min-width: 0;
+  padding-inline: 12px;
+  font-size: clamp(17px, 2.1vw, 25px);
+  line-height: 1;
+  transform: none !important;
+}
+.gecko-duo__button:hover {
+  transform: scale(1.04) !important;
+}
+.gecko-duo__button:active {
+  transform: scale(0.98) !important;
+}
+.chunk-btn--coingecko {
+  background: var(--white);
+  color: var(--text);
+}
 
 /* ---------- Lore card ---------- */
 .lore-card {
@@ -1762,6 +1789,7 @@ a {
 .chunk-btn--dex,
 .chunk-btn--share,
 .chunk-btn--gecko,
+.chunk-btn--coingecko,
 .chunk-btn--info,
 .copy-btn,
 .ca-label,
@@ -4034,5 +4062,16 @@ a {
     border-radius: 10px;
     padding: 5px 8px;
     text-align: center;
+  }
+}
+
+
+@media (max-width: 430px) {
+  .gecko-duo {
+    gap: 7px;
+  }
+  .gecko-duo__button {
+    padding-inline: 8px;
+    font-size: clamp(15px, 5vw, 19px);
   }
 }
